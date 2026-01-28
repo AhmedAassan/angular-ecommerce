@@ -1,0 +1,147 @@
+<!-- bottom bar ------------------------------------------------------- -->
+<nav class="bottom-nav mat-elevation-z4">
+  <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact:true }" matRipple>
+    <mat-icon>home</mat-icon><span>Home</span>
+  </a>
+
+  <!-- search toggler (NO routerLink) -->
+  <button type="button" class="nav-btn" matRipple (click)="toggle()">
+    <mat-icon>{{ showSearch ? 'close' : 'search' }}</mat-icon><span>Search</span>
+  </button>
+
+  <!-- <a routerLink="/booking-category" routerLinkActive="active" matRipple>
+    <mat-icon>content_cut</mat-icon><span>Service</span>
+  </a> -->
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- BOOKING MODE: Show "My Booking" (when apointmentCategories exists) -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  
+    <a routerLink="/booking-billing" routerLinkActive="active" matRipple>
+      <mat-icon>event</mat-icon>
+      <span>My Booking</span>
+    </a>
+  
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- ECOMMERCE MODE: Show "My Orders" (when apointmentCategories is empty) -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- @if (isEcommerceMode()) {
+    <a routerLink="/orders" routerLinkActive="active" matRipple>
+      <mat-icon>receipt_long</mat-icon>
+      <span>My Orders</span>
+    </a>
+  } -->
+   <a routerLink="/orders" routerLinkActive="active" matRipple>
+      <mat-icon>receipt_long</mat-icon>
+      <span>My Orders</span>
+    </a> 
+  <!-- <a routerLink="/wishlist" routerLinkActive="active" matRipple>
+    <mat-icon>favorite_border</mat-icon><span>Wishlist</span>
+  </a> -->
+  
+
+
+  <a routerLink="/profile" routerLinkActive="active" matRipple>
+    <mat-icon>person_outline</mat-icon><span>Account</span>
+  </a>
+
+  <!-- theme-switcher with improved design -->
+  <!-- <div class="theme-switcher">
+    <button type="button" class="theme-btn" matRipple (click)="toggleThemeMenu()">
+      <mat-icon>palette</mat-icon>
+      <span>Theme</span>
+    </button>
+
+    
+    <div class="theme-menu" [class.show]="showThemeMenu" (click)="$event.stopPropagation()">
+      <div class="theme-menu-header">
+        <span>Choose Theme</span>
+        <button type="button" class="close-btn" (click)="closeThemeMenu()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="theme-options">
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'light'"
+          (click)="selectTheme('light')">
+          <div class="theme-preview light"></div>
+          <span>🌞 Light</span>
+        </button>
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'dark'"
+          (click)="selectTheme('dark')">
+          <div class="theme-preview dark"></div>
+          <span>🌑 Dark</span>
+        </button>
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'orange'"
+          (click)="selectTheme('orange')">
+          <div class="theme-preview orange"></div>
+          <span>🟠 Orange</span>
+        </button>
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'blue'"
+          (click)="selectTheme('blue')">
+          <div class="theme-preview blue"></div>
+          <span>🔵 Blue</span>
+        </button>
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'green'"
+          (click)="selectTheme('green')">
+          <div class="theme-preview green"></div>
+          <span>🟢 Green</span>
+        </button>
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'blue-dark'"
+          (click)="selectTheme('blue-dark')">
+          <div class="theme-preview blue-dark"></div>
+          <span>🧿 Blue Dark</span>
+        </button>
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'green-dark'"
+          (click)="selectTheme('green-dark')">
+          <div class="theme-preview green-dark"></div>
+          <span>🌲 Green Dark</span>
+        </button>
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'velvet-rose'"
+          (click)="selectTheme('velvet-rose')">
+          <div class="theme-preview velvet-rose"></div>
+          <span>🌸 Velvet Rose</span>
+        </button>
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'velvet-rose-dark'"
+          (click)="selectTheme('velvet-rose-dark')">
+          <div class="theme-preview velvet-rose-dark"></div>
+          <span>🌹 Velvet Rose Dark</span>
+        </button>
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'graphite-mist'"
+          (click)="selectTheme('graphite-mist')">
+          <div class="theme-preview graphite-mist"></div>
+          <span>🪨 Graphite Mist</span>
+        </button>
+        <button type="button" class="theme-option" [class.active]="selectedTheme === 'graphite-mist-dark'"
+          (click)="selectTheme('graphite-mist-dark')">
+          <div class="theme-preview graphite-mist-dark"></div>
+          <span>🌫️ Graphite Mist Dark</span>
+        </button>
+      </div>
+    </div>
+  </div> -->
+</nav>
+
+<!-- slide-up search panel ------------------------------------------- -->
+<div class="search-sheet mat-elevation-z8" [class.animate]="showSearch" [hidden]="!showSearch">
+  <input type="search" #searchInput [formControl]="searchCtrl" placeholder="Search products" class="form-control" />
+
+  <div class="results" *ngIf="results$ | async as items">
+    <ng-container *ngIf="items !== null; else idle">
+      <!-- no hits -->
+      <div *ngIf="!items.length" class="no-res">
+        <mat-icon>search</mat-icon><br>No products found
+      </div>
+
+      <!-- hits -->
+      <a *ngFor="let p of items" [routerLink]="['/product', p.itemId]" (click)="closeAndReset()" class="res-item">
+        <img [src]="p.fullImageUrl || p.fullImageUrl" width="48" height="48" />
+        <div class="meta">
+          <h6>{{ p.englishName}}</h6>
+          <small>{{ p.price }} KWD</small>
+        </div>
+      </a>
+    </ng-container>
+    <ng-template #idle></ng-template>
+  </div>
+</div>

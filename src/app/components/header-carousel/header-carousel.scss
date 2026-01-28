@@ -1,0 +1,93 @@
+.carousel-container {
+  position: relative;
+  width: 100%;
+}
+
+.carousel-inner {
+  position: relative;
+  width: 100%;
+}
+
+.carousel-item {
+  display: none;
+  
+  &.active {
+    display: block;
+  }
+}
+
+// ✅ Full image - no cropping
+.carousel-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+// Controls
+.carousel-control {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: white;
+  font-size: 1.5rem;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.7);
+  }
+  
+  &-prev {
+    left: 20px;
+  }
+  
+  &-next {
+    right: 20px;
+  }
+}
+
+// Indicators
+.carousel-indicators {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+  
+  button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+    
+    &.active {
+      background: white;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .carousel-control {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    
+    &-prev { left: 10px; }
+    &-next { right: 10px; }
+  }
+}

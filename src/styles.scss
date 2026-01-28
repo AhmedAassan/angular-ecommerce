@@ -1,0 +1,37 @@
+// body.lang-en .navbar .cart-icon {
+//   order: 1;
+// }
+// body.lang-en .navbar .navbar-brand {
+//   order: 2;
+// }
+// body.lang-en .navbar .navbar-toggler {
+//   order: 3;
+// }
+
+// body.lang-ar {
+//   direction: rtl;
+// }
+// body.lang-ar .navbar .cart-icon {
+//   order: 3;
+// }
+// body.lang-ar .navbar .navbar-brand {
+//   order: 2;
+// }
+// body.lang-ar .navbar .navbar-toggler {
+//   order: 1;
+// }
+
+// @import '@angular/material/prebuilt-themes/cyan-orange.css';
+@use './styles/themes.scss';
+
+/* Base styles for html & body */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  transition: background-color 0.5s ease, color 0.5s ease;
+    
+  /* ✅ Theme variables */
+  background-color: var(--background-color);
+  color: var(--text-color);
+}

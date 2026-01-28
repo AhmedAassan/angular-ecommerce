@@ -1,0 +1,417 @@
+<div class="addresses-wrapper">
+    <!-- Addresses Header Section -->
+    <div class="addresses-header-section">
+        <div class="container">
+            <div class="addresses-header-content">
+                <div class="header-text">
+                    <h1 class="addresses-main-title">My Addresses</h1>
+                    <p class="addresses-subtitle">Manage your delivery locations and address book</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container addresses-content">
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <div class="action-bar-left">
+                <div class="addresses-count" *ngIf="!busy()">
+                    <span class="count-number">{{ list().length }}</span>
+                    <span class="count-text">{{ list().length === 1 ? 'Address' : 'Addresses' }}</span>
+                </div>
+            </div>
+            <div class="action-bar-right">
+                <a class="action-button secondary" routerLink="/profile">
+                    <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                        </path>
+                    </svg>
+                    Back to Profile
+                </a>
+                <button class="action-button primary" (click)="startAdd()">
+                    <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add New Address
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="busy()" class="loading-container">
+            <div class="loading-card">
+                <div class="loading-icon">
+                    <svg class="spinner" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                </div>
+                <div class="loading-content">
+                    <h3 class="loading-title">Loading Addresses</h3>
+                    <p class="loading-message">Please wait while we fetch your saved addresses...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Addresses List -->
+        <div class="addresses-grid" *ngIf="!busy()">
+            <!-- Empty State -->
+            <div *ngIf="list().length === 0" class="empty-state">
+                <div class="empty-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="empty-title">No Addresses Yet</h3>
+                <p class="empty-message">Add your first delivery address to get started with faster checkout.</p>
+                <button class="action-button primary" (click)="startAdd()">
+                    <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Your First Address
+                </button>
+            </div>
+
+            <!-- Address Cards -->
+            <div class="address-card" *ngFor="let a of list(); trackBy: trackByAddressId">
+                <!-- Address Header -->
+                <div class="address-header">
+                    <div class="address-location-info">
+                        <div class="location-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="location-details">
+                            <h3 class="area-name">{{ areaLabel(a.areaId) }}</h3>
+                            <div class="address-type-badge">Primary Address</div>
+                        </div>
+                    </div>
+                    <div class="address-actions-menu">
+                        <button class="menu-button" [class.active]="activeMenuId === a.id" (click)="toggleMenu(a.id)">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 5v.01M12 12v.01M12 19v.01"></path>
+                            </svg>
+                        </button>
+                        <div class="menu-dropdown" *ngIf="activeMenuId === a.id">
+                            <button class="menu-item edit" (click)="startEdit(a); closeMenu()">
+                                <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                    </path>
+                                </svg>
+                                Edit Address
+                            </button>
+                            <button class="menu-item delete" (click)="confirmDelete(a.id); closeMenu()">
+                                <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                    </path>
+                                </svg>
+                                Delete Address
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Body -->
+                <div class="address-body">
+                    <div class="address-details-grid">
+                        <!-- Block & Street -->
+                        <div class="detail-group">
+                            <div class="detail-item">
+                                <span class="detail-label">Block</span>
+                                <span class="detail-value">{{ a.blockNumber || '—' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Street</span>
+                                <span class="detail-value">{{ a.street || '—' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Building & Floor -->
+                        <div class="detail-group">
+                            <div class="detail-item">
+                                <span class="detail-label">Building</span>
+                                <span class="detail-value">{{ a.buildingNumber || '—' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Floor</span>
+                                <span class="detail-value">{{ a.floorNumber || '—' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Flat & Avenue -->
+                        <div class="detail-group">
+                            <div class="detail-item">
+                                <span class="detail-label">Flat</span>
+                                <span class="detail-value">{{ a.flatNumber || '—' }}</span>
+                            </div>
+                            <div class="detail-item" *ngIf="a.avenue">
+                                <span class="detail-label">Avenue</span>
+                                <span class="detail-value">{{ a.avenue }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="additional-info" *ngIf="a.addressLink || a.note">
+                        <!-- Map Link -->
+                        <div class="info-item" *ngIf="a.addressLink">
+                            <div class="info-icon-wrapper">
+                                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <span class="info-label">Map Location</span>
+                                <a class="map-link" [href]="a.addressLink" target="_blank" rel="noopener noreferrer">
+                                    View on Google Maps
+                                    <svg class="external-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                        </path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="info-item" *ngIf="a.note">
+                            <div class="info-icon-wrapper">
+                                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <span class="info-label">Special Note</span>
+                                <p class="note-text">{{ a.note }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="address-footer">
+                    <div class="quick-actions">
+                        <button class="quick-action-btn edit" (click)="startEdit(a)">
+                            <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                </path>
+                            </svg>
+                            Edit
+                        </button>
+                        <button class="quick-action-btn delete" (click)="confirmDelete(a.id)">
+                            <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                </path>
+                            </svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Form -->
+        <div class="form-container" *ngIf="formOpen()">
+            <div class="form-card">
+                <!-- Form Header -->
+                <div class="form-header">
+                    <div class="form-header-content">
+                        <div class="form-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="form-header-text">
+                            <h2 class="form-title">{{ editingId() === 0 ? 'Add New Address' : 'Edit Address' }}</h2>
+                            <p class="form-subtitle">{{ editingId() === 0 ? 'Add a new delivery location to your address
+                                book' : 'Update your address information' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Body -->
+                <div class="form-body">
+                    <form [formGroup]="form" (ngSubmit)="save()" class="address-form">
+                        <div class="form-section">
+                            <h3 class="section-title">Location Details</h3>
+                            <div class="form-grid">
+                                <div class="form-field full-width">
+                                    <label class="form-label required">Area</label>
+                                    <div class="select-wrapper">
+                                        <select class="form-select" formControlName="areaId">
+                                            <option [ngValue]="0" disabled>Select your area</option>
+                                            <option *ngFor="let a of areas()" [ngValue]="a.id">
+                                                {{ a.englishName }} — {{ a.arabicName }}
+                                            </option>
+                                        </select>
+                                        
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label class="form-label">Street</label>
+                                    <div class="input-wrapper">
+                                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
+                                            </path>
+                                        </svg>
+                                        <input class="form-input" formControlName="street"
+                                            placeholder="Enter street name or number" />
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label class="form-label">Avenue</label>
+                                    <div class="input-wrapper">
+                                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
+                                            </path>
+                                        </svg>
+                                        <input class="form-input" formControlName="avenue"
+                                            placeholder="Enter avenue name" />
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label class="form-label">Block Number</label>
+                                    <div class="input-wrapper">
+                                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                                            </path>
+                                        </svg>
+                                        <input class="form-input" formControlName="blockNumber"
+                                            placeholder="Block number" />
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label class="form-label">Building Number</label>
+                                    <div class="input-wrapper">
+                                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                                            </path>
+                                        </svg>
+                                        <input class="form-input" formControlName="buildingNumber"
+                                            placeholder="Building number" />
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label class="form-label">Floor Number</label>
+                                    <div class="input-wrapper">
+                                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                        </svg>
+                                        <input class="form-input" formControlName="floorNumber"
+                                            placeholder="Floor number" />
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label class="form-label">Flat Number</label>
+                                    <div class="input-wrapper">
+                                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z">
+                                            </path>
+                                        </svg>
+                                        <input class="form-input" formControlName="flatNumber"
+                                            placeholder="Flat/Apartment number" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title">Additional Information</h3>
+                            <div class="form-grid">
+                                <div class="form-field full-width">
+                                    <label class="form-label">Google Maps Link</label>
+                                    <div class="input-wrapper">
+                                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                                            </path>
+                                        </svg>
+                                        <input class="form-input" formControlName="addressLink"
+                                            placeholder="Paste Google Maps link here" />
+                                    </div>
+                                    <small class="form-hint">Optional: Add a Google Maps link for easier
+                                        navigation</small>
+                                </div>
+
+                                <div class="form-field full-width">
+                                    <label class="form-label">Special Notes</label>
+                                    <div class="textarea-wrapper">
+                                        <svg class="textarea-icon" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z">
+                                            </path>
+                                        </svg>
+                                        <textarea class="form-textarea" rows="3" formControlName="note"
+                                            placeholder="Add delivery instructions or landmarks (Optional)"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="submit" class="action-button primary large"
+                                [disabled]="form.invalid || saving()">
+                                <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    *ngIf="!saving()">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                
+                                {{ saving() ? 'Saving...' : (editingId() === 0 ? 'Add Address' : 'Update Address') }}
+                            </button>
+                            <button type="button" class="action-button secondary large" (click)="closeForm()">
+                                <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,51 @@
+<section class="carousel-container">
+  
+  <!-- Slides -->
+  <div class="carousel-inner">
+    @for (slide of slides; track slide.id; let i = $index) {
+      <div 
+        class="carousel-item"
+        [class.active]="i === currentSlide">
+        
+        <!-- ✅ Full image without cropping -->
+        <img 
+          [src]="slide.imageSrc"
+          [alt]="slide.altText"
+          class="carousel-img">
+      </div>
+    }
+  </div>
+
+  <!-- Indicators -->
+  @if (slides.length > 1) {
+    <div class="carousel-indicators">
+      @for (slide of slides; track slide.id; let i = $index) {
+        <button
+          type="button"
+          [class.active]="i === currentSlide"
+          [attr.aria-label]="'Go to slide ' + (i + 1)"
+          (click)="goToSlide(i)">
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Navigation Controls -->
+  @if (slides.length > 1) {
+    <button 
+      class="carousel-control carousel-control-prev"
+      type="button"
+      aria-label="Previous slide"
+      (click)="prevSlide()">
+      <span aria-hidden="true">&#10094;</span>
+    </button>
+    
+    <button 
+      class="carousel-control carousel-control-next"
+      type="button"
+      aria-label="Next slide"
+      (click)="nextSlide()">
+      <span aria-hidden="true">&#10095;</span>
+    </button>
+  }
+</section>

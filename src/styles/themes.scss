@@ -1,0 +1,697 @@
+:root {
+  // Existing variables
+  --product-color: #f46d29;
+  --product-color-hover: #e55a1f;
+  --background-color: #ffffff;
+  --text-color: #1a1a1a;
+  --desc-color: #6b7280;
+  --card-bg: #ffffff;
+  --image-bg: #f8f9fa;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --wishlist-bg: rgba(255, 255, 255, 0.9);
+  --wishlist-border: rgba(255, 255, 255, 0.2);
+  --wishlist-color: #6b7280;
+  --wishlist-hover-bg: rgba(255, 255, 255, 1);
+  --wishlist-hover-color: #ef4444;
+  --rating-color: #fbbf24;
+  --sale-color: #ef4444;
+  
+  // Additional filter/sort variables
+  // Card variables
+  --card-border: 1px solid rgba(0, 0, 0, 0.08);
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --card-header-bg: #ffffff;
+  --card-header-hover: #f8f9fa;
+  --card-header-active: #fff8f4;
+  --card-body-bg: #ffffff;
+  
+  // Input variables
+  --input-border: 1px solid #e1e5e9;
+  --input-bg: #ffffff;
+  --input-focus-bg: #ffffff;
+  --placeholder-color: #9ca3af;
+  
+  // Checkbox and radio variables
+  --text-radio-color:#352529;
+  --checkbox-border: #d1d5db;
+  --checkbox-bg: #ffffff;
+  --radio-border: #d1d5db;
+  --radio-bg: #ffffff;
+  --radio-checked-bg: #fff8f4;
+  --radio-hover-bg: #f8f9fa;
+  
+  // Drawer variables
+  --drawer-bg: rgba(255, 255, 255, 0.95);
+  --drawer-border: 1px solid rgba(0, 0, 0, 0.1);
+  --drawer-header-bg: #ffffff;
+
+  --item-divider: 1px solid #f3f4f6;
+  
+  // Button variables
+  --close-btn-bg: #f3f4f6;
+  --close-btn-color: #6b7280;
+  --close-btn-hover: #e5e7eb;
+  --reset-bg: transparent;
+  --reset-color: #6b7280;
+  --reset-border: 1px solid #e5e7eb;
+  --reset-hover-bg: #f3f4f6;
+  --reset-hover-color: #374151;
+  
+  // Utility variables
+  --backdrop-bg: rgba(0, 0, 0, 0.3);
+  --handle-color: #d1d5db;
+  --icon-color: #6b7280;
+  --secondary-text: #6b7280;
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #cbd5e1;
+
+  --booking-color: #2563eb;       
+  --booking-color-hover: #1d4ed8;
+}
+
+[data-theme='dark'] {
+  // Existing variables
+  --product-color: #ff8000; 
+  --product-color-hover: #f57c00;
+  --background-color: #1a1a1a;
+  --text-color: #ffffff;
+  --desc-color: #a1a1aa;
+  --card-bg: #2a2a2a;
+  --image-bg: #3a3a3a;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
+  --wishlist-bg: rgba(42, 42, 42, 0.9);
+  --wishlist-border: rgba(255, 255, 255, 0.1);
+  --wishlist-color: #a1a1aa;
+  --wishlist-hover-bg: rgba(42, 42, 42, 1);
+  --wishlist-hover-color: #f87171;
+  --rating-color: #fbbf24;
+  --sale-color: #f87171;
+  
+  // Additional filter/sort variables
+  // Card variables
+  --card-border: 1px solid rgba(255, 255, 255, 0.1);
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --card-header-bg: #2a2a2a;
+  --card-header-hover: #333333;
+  --card-header-active: #332a24;
+  --card-body-bg: #2a2a2a;
+  
+  // Input variables
+  --input-border: 1px solid #404040;
+  --input-bg: #333333;
+  --input-focus-bg: #383838;
+  --placeholder-color: #9ca3af;
+  
+  // Checkbox and radio variables
+  --text-radio-color:#ffffff;
+  --checkbox-border: #525252;
+  --checkbox-bg: #333333;
+  --radio-border: #525252;
+  --radio-bg: #333333;
+  --radio-checked-bg: #332a24;
+  --radio-hover-bg: #333333;
+  
+  // Drawer variables
+  --drawer-bg: rgba(26, 26, 26, 0.95);
+  --drawer-border: 1px solid rgba(255, 255, 255, 0.1);
+  --drawer-header-bg: #2a2a2a;
+
+  --item-divider: 1px solid #333333;
+  
+  // Button variables
+  --close-btn-bg: #404040;
+  --close-btn-color: #d1d5db;
+  --close-btn-hover: #525252;
+  --reset-bg: transparent;
+  --reset-color: #d1d5db;
+  --reset-border: 1px solid #525252;
+  --reset-hover-bg: #404040;
+  --reset-hover-color: #f3f4f6;
+  
+  // Utility variables
+  --backdrop-bg: rgba(0, 0, 0, 0.6);
+  --handle-color: #525252;
+  --icon-color: #d1d5db;
+  --secondary-text: #d1d5db;
+  --scrollbar-track: #333333;
+  --scrollbar-thumb: #525252;
+
+  --booking-color: #22c55e;       
+  --booking-color-hover: #16a34a;
+}
+
+[data-theme='orange'] {
+  // Existing variables
+  --product-color: #f57c00;
+  --product-color-hover: #ef6c00;
+  --background-color: #fff8f1;
+  --text-color: #2d1810;
+  --desc-color: #8b5a3c;
+  --card-bg: #fffaf5;
+  --image-bg: #fff5eb;
+  --card-shadow: 0 2px 12px rgba(245, 124, 0, 0.1);
+  --card-shadow-hover: 0 8px 25px rgba(245, 124, 0, 0.2);
+  --wishlist-bg: rgba(255, 250, 245, 0.9);
+  --wishlist-border: rgba(245, 124, 0, 0.1);
+  --wishlist-color: #8b5a3c;
+  --wishlist-hover-bg: rgba(255, 250, 245, 1);
+  --wishlist-hover-color: #d84315;
+  --rating-color: #ff8f00;
+  --sale-color: #d84315;
+  
+  // Additional filter/sort variables
+  // Card variables
+  --card-border: 1px solid rgba(245, 124, 0, 0.15);
+  --card-shadow: 0 2px 12px rgba(245, 124, 0, 0.08);
+  --card-shadow-hover: 0 8px 24px rgba(245, 124, 0, 0.12);
+  --card-header-bg: #fffaf5;
+  --card-header-hover: #fff5eb;
+  --card-header-active: #fff0e0;
+  --card-body-bg: #fffaf5;
+  
+  // Input variables
+  --input-border: 1px solid #fed7aa;
+  --input-bg: #fffaf5;
+  --input-focus-bg: #ffffff;
+  --placeholder-color: #a16207;
+  
+  // Checkbox and radio variables
+  --text-radio-color:#352529;
+  --checkbox-border: #fed7aa;
+  --checkbox-bg: #fffaf5;
+  --radio-border: #fed7aa;
+  --radio-bg: #fffaf5;
+  --radio-checked-bg: #fff0e0;
+  --radio-hover-bg: #fff5eb;
+  
+  // Drawer variables
+  --drawer-bg: rgba(255, 250, 245, 0.95);
+  --drawer-border: 1px solid rgba(245, 124, 0, 0.2);
+  --drawer-header-bg: #fffaf5;
+  --item-divider: 1px solid #fef3c7;
+
+  // Button variables
+  --close-btn-bg: #fed7aa;
+  --close-btn-color: #a16207;
+  --close-btn-hover: #fcd34d;
+  --reset-bg: transparent;
+  --reset-color: #a16207;
+  --reset-border: 1px solid #fed7aa;
+  --reset-hover-bg: #fef3c7;
+  --reset-hover-color: #78350f;
+  
+  // Utility variables
+  --backdrop-bg: rgba(245, 124, 0, 0.2);
+  --handle-color: #fed7aa;
+  --icon-color: #a16207;
+  --secondary-text: #a16207;
+  --scrollbar-track: #fef3c7;
+  --scrollbar-thumb: #fed7aa;
+
+  --booking-color: #7c3aed;        
+  --booking-color-hover: #6d28d9;
+}
+
+[data-theme='blue'] {
+  --product-color: #1e88e5;
+  --product-color-hover: #1976d2;
+  --background-color: #f0f8ff;
+  --text-color: #1a1a1a;
+  --desc-color: #546e7a;
+  --card-bg: #e3f2fd;
+  --image-bg: #e1f5fe;
+  --card-shadow: 0 2px 12px rgba(30, 136, 229, 0.08);
+  --card-shadow-hover: 0 8px 25px rgba(30, 136, 229, 0.15);
+  --wishlist-bg: rgba(227, 242, 253, 0.9);
+  --wishlist-border: rgba(30, 136, 229, 0.1);
+  --wishlist-color: #546e7a;
+  --wishlist-hover-bg: rgba(227, 242, 253, 1);
+  --wishlist-hover-color: #d32f2f;
+  --rating-color: #ff8f00;
+  --sale-color: #d32f2f;
+  
+  // Filter/sort variables
+  --card-border: 1px solid rgba(30, 136, 229, 0.15);
+  --card-header-bg: #e3f2fd;
+  --card-header-hover: #e1f5fe;
+  --card-header-active: #e0f2f1;
+  --card-body-bg: #e3f2fd;
+  --input-border: 1px solid #bbdefb;
+  --input-bg: #e3f2fd;
+  --input-focus-bg: #ffffff;
+  --placeholder-color: #546e7a;
+  --text-radio-color: #1a1a1a;
+  --checkbox-border: #bbdefb;
+  --checkbox-bg: #e3f2fd;
+  --radio-border: #bbdefb;
+  --radio-bg: #e3f2fd;
+  --radio-checked-bg: #e0f2f1;
+  --radio-hover-bg: #e1f5fe;
+  --drawer-bg: rgba(240, 248, 255, 0.95);
+  --drawer-border: 1px solid rgba(30, 136, 229, 0.2);
+  --drawer-header-bg: #e3f2fd;
+  --item-divider: 1px solid #e1f5fe;
+  --close-btn-bg: #bbdefb;
+  --close-btn-color: #1976d2;
+  --close-btn-hover: #90caf9;
+  --reset-bg: transparent;
+  --reset-color: #546e7a;
+  --reset-border: 1px solid #bbdefb;
+  --reset-hover-bg: #e1f5fe;
+  --reset-hover-color: #1976d2;
+  --backdrop-bg: rgba(30, 136, 229, 0.2);
+  --handle-color: #bbdefb;
+  --icon-color: #546e7a;
+  --secondary-text: #546e7a;
+  --scrollbar-track: #e1f5fe;
+  --scrollbar-thumb: #bbdefb;
+
+  --booking-color: #10b981;        
+  --booking-color-hover: #059669;
+}
+
+[data-theme='green'] {
+  --product-color: #43a047;
+  --product-color-hover: #388e3c;
+  --background-color: #f3fbf4;
+  --text-color: #1a1a1a;
+  --desc-color: #4e5d4e;
+  --card-bg: #e1f5e6;
+  --image-bg: #e8f5e8;
+  --card-shadow: 0 2px 12px rgba(67, 160, 71, 0.08);
+  --card-shadow-hover: 0 8px 25px rgba(67, 160, 71, 0.15);
+  --wishlist-bg: rgba(225, 245, 230, 0.9);
+  --wishlist-border: rgba(67, 160, 71, 0.1);
+  --wishlist-color: #4e5d4e;
+  --wishlist-hover-bg: rgba(225, 245, 230, 1);
+  --wishlist-hover-color: #d32f2f;
+  --rating-color: #ff8f00;
+  --sale-color: #d32f2f;
+  
+  // Filter/sort variables
+  --card-border: 1px solid rgba(67, 160, 71, 0.15);
+  --card-header-bg: #e1f5e6;
+  --card-header-hover: #e8f5e8;
+  --card-header-active: #dcedc8;
+  --card-body-bg: #e1f5e6;
+  --input-border: 1px solid #c8e6c9;
+  --input-bg: #e1f5e6;
+  --input-focus-bg: #ffffff;
+  --placeholder-color: #4e5d4e;
+  --text-radio-color: #1a1a1a;
+  --checkbox-border: #c8e6c9;
+  --checkbox-bg: #e1f5e6;
+  --radio-border: #c8e6c9;
+  --radio-bg: #e1f5e6;
+  --radio-checked-bg: #dcedc8;
+  --radio-hover-bg: #e8f5e8;
+  --drawer-bg: rgba(243, 251, 244, 0.95);
+  --drawer-border: 1px solid rgba(67, 160, 71, 0.2);
+  --drawer-header-bg: #e1f5e6;
+  --item-divider: 1px solid #e8f5e8;
+  --close-btn-bg: #c8e6c9;
+  --close-btn-color: #388e3c;
+  --close-btn-hover: #a5d6a7;
+  --reset-bg: transparent;
+  --reset-color: #4e5d4e;
+  --reset-border: 1px solid #c8e6c9;
+  --reset-hover-bg: #e8f5e8;
+  --reset-hover-color: #388e3c;
+  --backdrop-bg: rgba(67, 160, 71, 0.2);
+  --handle-color: #c8e6c9;
+  --icon-color: #4e5d4e;
+  --secondary-text: #4e5d4e;
+  --scrollbar-track: #e8f5e8;
+  --scrollbar-thumb: #c8e6c9;
+
+   --booking-color: #6366f1;        
+  --booking-color-hover: #4f46e5; 
+}
+
+[data-theme='blue-dark'] {
+  --product-color: #90caf9;
+  --product-color-hover: #64b5f6;
+  --background-color: #121e2d;
+  --text-color: #e3f2fd;
+  --desc-color: #b0bec5;
+  --card-bg: #1e2b3a;
+  --image-bg: #263238;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
+  --wishlist-bg: rgba(30, 43, 58, 0.9);
+  --wishlist-border: rgba(144, 202, 249, 0.1);
+  --wishlist-color: #b0bec5;
+  --wishlist-hover-bg: rgba(30, 43, 58, 1);
+  --wishlist-hover-color: #f48fb1;
+  --rating-color: #ffb74d;
+  --sale-color: #f48fb1;
+  
+  // Filter/sort variables
+  --card-border: 1px solid rgba(144, 202, 249, 0.1);
+  --card-header-bg: #1e2b3a;
+  --card-header-hover: #263238;
+  --card-header-active: #1c3540;
+  --card-body-bg: #1e2b3a;
+  --input-border: 1px solid #37474f;
+  --input-bg: #263238;
+  --input-focus-bg: #2c3e47;
+  --placeholder-color: #b0bec5;
+  --text-radio-color: #e3f2fd;
+  --checkbox-border: #546e7a;
+  --checkbox-bg: #263238;
+  --radio-border: #546e7a;
+  --radio-bg: #263238;
+  --radio-checked-bg: #1c3540;
+  --radio-hover-bg: #37474f;
+  --drawer-bg: rgba(18, 30, 45, 0.95);
+  --drawer-border: 1px solid rgba(144, 202, 249, 0.1);
+  --drawer-header-bg: #1e2b3a;
+  --item-divider: 1px solid #263238;
+  --close-btn-bg: #37474f;
+  --close-btn-color: #b0bec5;
+  --close-btn-hover: #546e7a;
+  --reset-bg: transparent;
+  --reset-color: #b0bec5;
+  --reset-border: 1px solid #546e7a;
+  --reset-hover-bg: #37474f;
+  --reset-hover-color: #e3f2fd;
+  --backdrop-bg: rgba(0, 0, 0, 0.6);
+  --handle-color: #546e7a;
+  --icon-color: #b0bec5;
+  --secondary-text: #b0bec5;
+  --scrollbar-track: #263238;
+  --scrollbar-thumb: #546e7a;
+
+   --booking-color: #f472b6;       
+  --booking-color-hover: #ec4899; 
+}
+
+[data-theme='green-dark'] {
+  --product-color: #81c784;
+  --product-color-hover: #66bb6a;
+  --background-color: #0f1d17;
+  --text-color: #e8f5e9;
+  --desc-color: #a5d6a7;
+  --card-bg: #1b2f26;
+  --image-bg: #263238;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
+  --wishlist-bg: rgba(27, 47, 38, 0.9);
+  --wishlist-border: rgba(129, 199, 132, 0.1);
+  --wishlist-color: #a5d6a7;
+  --wishlist-hover-bg: rgba(27, 47, 38, 1);
+  --wishlist-hover-color: #f48fb1;
+  --rating-color: #ffb74d;
+  --sale-color: #f48fb1;
+  
+  // Filter/sort variables
+  --card-border: 1px solid rgba(129, 199, 132, 0.1);
+  --card-header-bg: #1b2f26;
+  --card-header-hover: #263238;
+  --card-header-active: #1c3e2a;
+  --card-body-bg: #1b2f26;
+  --input-border: 1px solid #2e5d3e;
+  --input-bg: #263238;
+  --input-focus-bg: #2c4a3f;
+  --placeholder-color: #a5d6a7;
+  --text-radio-color: #e8f5e9;
+  --checkbox-border: #4caf50;
+  --checkbox-bg: #263238;
+  --radio-border: #4caf50;
+  --radio-bg: #263238;
+  --radio-checked-bg: #1c3e2a;
+  --radio-hover-bg: #2e5d3e;
+  --drawer-bg: rgba(15, 29, 23, 0.95);
+  --drawer-border: 1px solid rgba(129, 199, 132, 0.1);
+  --drawer-header-bg: #1b2f26;
+  --item-divider: 1px solid #263238;
+  --close-btn-bg: #2e5d3e;
+  --close-btn-color: #a5d6a7;
+  --close-btn-hover: #4caf50;
+  --reset-bg: transparent;
+  --reset-color: #a5d6a7;
+  --reset-border: 1px solid #4caf50;
+  --reset-hover-bg: #2e5d3e;
+  --reset-hover-color: #e8f5e9;
+  --backdrop-bg: rgba(0, 0, 0, 0.6);
+  --handle-color: #4caf50;
+  --icon-color: #a5d6a7;
+  --secondary-text: #a5d6a7;
+  --scrollbar-track: #263238;
+  --scrollbar-thumb: #4caf50;
+
+  --booking-color: #f59e0b;        
+  --booking-color-hover: #d97706;
+}
+
+[data-theme='velvet-rose'] {
+  --product-color: #d16ba5;
+  --product-color-hover: #c2185b;
+  --background-color: #fdf4f9;
+  --text-color: #2c1e2f;
+  --desc-color: #7b4a5c;
+  --card-bg: #f8e8f0;
+  --image-bg: #fce4ec;
+  --card-shadow: 0 2px 12px rgba(209, 107, 165, 0.08);
+  --card-shadow-hover: 0 8px 25px rgba(209, 107, 165, 0.15);
+  --wishlist-bg: rgba(248, 232, 240, 0.9);
+  --wishlist-border: rgba(209, 107, 165, 0.1);
+  --wishlist-color: #7b4a5c;
+  --wishlist-hover-bg: rgba(248, 232, 240, 1);
+  --wishlist-hover-color: #e91e63;
+  --rating-color: #ff8f00;
+  --sale-color: #e91e63;
+  
+  // Filter/sort variables
+  --card-border: 1px solid rgba(209, 107, 165, 0.15);
+  --card-header-bg: #f8e8f0;
+  --card-header-hover: #fce4ec;
+  --card-header-active: #f3e5f5;
+  --card-body-bg: #f8e8f0;
+  --input-border: 1px solid #f8bbd9;
+  --input-bg: #f8e8f0;
+  --input-focus-bg: #ffffff;
+  --placeholder-color: #7b4a5c;
+  --text-radio-color: #2c1e2f;
+  --checkbox-border: #f8bbd9;
+  --checkbox-bg: #f8e8f0;
+  --radio-border: #f8bbd9;
+  --radio-bg: #f8e8f0;
+  --radio-checked-bg: #f3e5f5;
+  --radio-hover-bg: #fce4ec;
+  --drawer-bg: rgba(253, 244, 249, 0.95);
+  --drawer-border: 1px solid rgba(209, 107, 165, 0.2);
+  --drawer-header-bg: #f8e8f0;
+  --item-divider: 1px solid #fce4ec;
+  --close-btn-bg: #f8bbd9;
+  --close-btn-color: #c2185b;
+  --close-btn-hover: #f48fb1;
+  --reset-bg: transparent;
+  --reset-color: #7b4a5c;
+  --reset-border: 1px solid #f8bbd9;
+  --reset-hover-bg: #fce4ec;
+  --reset-hover-color: #c2185b;
+  --backdrop-bg: rgba(209, 107, 165, 0.2);
+  --handle-color: #f8bbd9;
+  --icon-color: #7b4a5c;
+  --secondary-text: #7b4a5c;
+  --scrollbar-track: #fce4ec;
+  --scrollbar-thumb: #f8bbd9;
+
+  --booking-color: #0ea5e9;       
+  --booking-color-hover: #0284c7;
+}
+
+[data-theme='velvet-rose-dark'] {
+  --product-color: #ff85b3;
+  --product-color-hover: #f06292;
+  --background-color: #1c1218;
+  --text-color: #fceef5;
+  --desc-color: #e1bee7;
+  --card-bg: #2b1a23;
+  --image-bg: #37474f;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
+  --wishlist-bg: rgba(43, 26, 35, 0.9);
+  --wishlist-border: rgba(255, 133, 179, 0.1);
+  --wishlist-color: #e1bee7;
+  --wishlist-hover-bg: rgba(43, 26, 35, 1);
+  --wishlist-hover-color: #ff4081;
+  --rating-color: #ffb74d;
+  --sale-color: #ff4081;
+  
+  // Filter/sort variables
+  --card-border: 1px solid rgba(255, 133, 179, 0.1);
+  --card-header-bg: #2b1a23;
+  --card-header-hover: #37474f;
+  --card-header-active: #3a2530;
+  --card-body-bg: #2b1a23;
+  --input-border: 1px solid #512da8;
+  --input-bg: #37474f;
+  --input-focus-bg: #4a3340;
+  --placeholder-color: #e1bee7;
+  --text-radio-color: #fceef5;
+  --checkbox-border: #ad1457;
+  --checkbox-bg: #37474f;
+  --radio-border: #ad1457;
+  --radio-bg: #37474f;
+  --radio-checked-bg: #3a2530;
+  --radio-hover-bg: #512da8;
+  --drawer-bg: rgba(28, 18, 24, 0.95);
+  --drawer-border: 1px solid rgba(255, 133, 179, 0.1);
+  --drawer-header-bg: #2b1a23;
+  --item-divider: 1px solid #37474f;
+  --close-btn-bg: #512da8;
+  --close-btn-color: #e1bee7;
+  --close-btn-hover: #ad1457;
+  --reset-bg: transparent;
+  --reset-color: #e1bee7;
+  --reset-border: 1px solid #ad1457;
+  --reset-hover-bg: #512da8;
+  --reset-hover-color: #fceef5;
+  --backdrop-bg: rgba(0, 0, 0, 0.6);
+  --handle-color: #ad1457;
+  --icon-color: #e1bee7;
+  --secondary-text: #e1bee7;
+  --scrollbar-track: #37474f;
+  --scrollbar-thumb: #ad1457;
+
+  --booking-color: #2dd4bf;        
+  --booking-color-hover: #14b8a6;
+}
+
+[data-theme='graphite-mist'] {
+  --product-color: #00bfa5;
+  --product-color-hover: #00acc1;
+  --background-color: #f7f9fb;
+  --text-color: #1a1a1a;
+  --desc-color: #546e7a;
+  --card-bg: #ffffff;
+  --image-bg: #f5f5f5;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --card-shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.08);
+  --wishlist-bg: rgba(255, 255, 255, 0.9);
+  --wishlist-border: rgba(0, 191, 165, 0.1);
+  --wishlist-color: #546e7a;
+  --wishlist-hover-bg: rgba(255, 255, 255, 1);
+  --wishlist-hover-color: #f44336;
+  --rating-color: #ff8f00;
+  --sale-color: #f44336;
+  
+  // Filter/sort variables
+  --card-border: 1px solid rgba(0, 0, 0, 0.05);
+  --card-header-bg: #ffffff;
+  --card-header-hover: #f5f5f5;
+  --card-header-active: #e0f2f1;
+  --card-body-bg: #ffffff;
+  --input-border: 1px solid #e0e0e0;
+  --input-bg: #ffffff;
+  --input-focus-bg: #ffffff;
+  --placeholder-color: #9e9e9e;
+  --text-radio-color: #1a1a1a;
+  --checkbox-border: #e0e0e0;
+  --checkbox-bg: #ffffff;
+  --radio-border: #e0e0e0;
+  --radio-bg: #ffffff;
+  --radio-checked-bg: #e0f2f1;
+  --radio-hover-bg: #f5f5f5;
+  --drawer-bg: rgba(247, 249, 251, 0.95);
+  --drawer-border: 1px solid rgba(0, 0, 0, 0.1);
+  --drawer-header-bg: #ffffff;
+  --item-divider: 1px solid #f5f5f5;
+  --close-btn-bg: #f5f5f5;
+  --close-btn-color: #757575;
+  --close-btn-hover: #e0e0e0;
+  --reset-bg: transparent;
+  --reset-color: #757575;
+  --reset-border: 1px solid #e0e0e0;
+  --reset-hover-bg: #f5f5f5;
+  --reset-hover-color: #424242;
+  --backdrop-bg: rgba(0, 0, 0, 0.3);
+  --handle-color: #e0e0e0;
+  --icon-color: #757575;
+  --secondary-text: #757575;
+  --scrollbar-track: #f5f5f5;
+  --scrollbar-thumb: #e0e0e0;
+
+  --booking-color: #7c3aed;        
+  --booking-color-hover: #6d28d9;
+}
+
+[data-theme='graphite-mist-dark'] {
+  --product-color: #1de9b6;
+  --product-color-hover: #00e5ff;
+  --background-color: #1c1c1e;
+  --text-color: #eaeaea;
+  --desc-color: #90a4ae;
+
+  --card-bg: #2a2a2d;
+  --image-bg: #2f2f33;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  --wishlist-bg: rgba(42, 42, 45, 0.9);
+  --wishlist-border: rgba(29, 233, 182, 0.1);
+  --wishlist-color: #90a4ae;
+  --wishlist-hover-bg: rgba(42, 42, 45, 1);
+  --wishlist-hover-color: #ff5252;
+
+  --rating-color: #ffd740;
+  --sale-color: #ff5252;
+
+  // Card variables
+  --card-border: 1px solid rgba(255, 255, 255, 0.08);
+  --card-header-bg: #2a2a2d;
+  --card-header-hover: #2f2f33;
+  --card-header-active: #324148;
+  --card-body-bg: #2a2a2d;
+
+  // Input variables
+  --input-border: 1px solid #424242;
+  --input-bg: #2f2f33;
+  --input-focus-bg: #35363a;
+  --placeholder-color: #b0bec5;
+
+  // Checkbox and radio variables
+  --text-radio-color: #eaeaea;
+  --checkbox-border: #616161;
+  --checkbox-bg: #2f2f33;
+  --radio-border: #616161;
+  --radio-bg: #2f2f33;
+  --radio-checked-bg: #1f403d;
+  --radio-hover-bg: #35363a;
+
+  // Drawer variables
+  --drawer-bg: rgba(28, 28, 30, 0.95);
+  --drawer-border: 1px solid rgba(255, 255, 255, 0.08);
+  --drawer-header-bg: #2a2a2d;
+
+  --item-divider: 1px solid #2f2f33;
+
+  // Button variables
+  --close-btn-bg: #35363a;
+  --close-btn-color: #b0bec5;
+  --close-btn-hover: #424242;
+
+  --reset-bg: transparent;
+  --reset-color: #b0bec5;
+  --reset-border: 1px solid #616161;
+  --reset-hover-bg: #35363a;
+  --reset-hover-color: #ffffff;
+
+  // Utility variables
+  --backdrop-bg: rgba(0, 0, 0, 0.6);
+  --handle-color: #616161;
+  --icon-color: #b0bec5;
+  --secondary-text: #b0bec5;
+
+  --scrollbar-track: #2f2f33;
+  --scrollbar-thumb: #424242;
+
+  --booking-color: #a78bfa;        
+  --booking-color-hover: #8b5cf6;
+}

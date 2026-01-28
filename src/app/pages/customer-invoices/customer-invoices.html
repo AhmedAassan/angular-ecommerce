@@ -1,0 +1,346 @@
+<div class="invoices-container">
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- HEADER -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="invoices-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>My Orders</h1>
+        <p>Track and manage your orders</p>
+      </div>
+
+      <div class="header-actions">
+        <button mat-icon-button (click)="refreshInvoices()" [disabled]="loading()" matTooltip="Refresh">
+          <mat-icon>refresh</mat-icon>
+        </button>
+
+        <button mat-icon-button (click)="toggleViewMode()" matTooltip="Toggle View">
+          <mat-icon>{{ viewMode() === 'grid' ? 'view_list' : 'grid_view' }}</mat-icon>
+        </button>
+
+        <button mat-icon-button (click)="toggleFilters()" matTooltip="Toggle Filters">
+          <mat-icon>filter_list</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <mat-icon>receipt_long</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().total }}</span>
+          <span class="stat-label">Total Orders</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <mat-icon>attach_money</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ formatCurrency(stats().totalAmount) }}</span>
+          <span class="stat-label">Total Spent</span>
+        </div>
+      </div>
+
+      <div class="stat-card success">
+        <mat-icon>check_circle</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().paid }}</span>
+          <span class="stat-label">Paid</span>
+        </div>
+      </div>
+
+      <div class="stat-card warning">
+        <mat-icon>pending</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().unpaid }}</span>
+          <span class="stat-label">Unpaid</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- FILTERS -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  @if (showFilters()) {
+  <div class="filters-section">
+    <div class="filter-chips">
+      <button mat-stroked-button [class.active]="isFilterActive(null)" (click)="setFilter(null)">
+        <mat-icon>all_inbox</mat-icon>
+        All
+        <span class="chip-badge">{{ stats().total }}</span>
+      </button>
+
+      @for (status of allStatuses(); track trackByStatus($index, status)) {
+      <button mat-stroked-button [class.active]="isFilterActive(status.id)" [style.--status-color]="status.color"
+        (click)="setFilter(status.id)">
+        <mat-icon [style.color]="status.color">{{ status.icon }}</mat-icon>
+        {{ status.labelEN }}
+        @if (getStatusCount(status.id) > 0) {
+        <span class="chip-badge" [style.background]="status.color">
+          {{ getStatusCount(status.id) }}
+        </span>
+        }
+      </button>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- LOADING STATE -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  @if (loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading your orders...</p>
+  </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- ERROR STATE -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  @if (error()) {
+  <div class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <h3>Failed to load orders</h3>
+    <p>{{ error() }}</p>
+    <button mat-flat-button color="primary" (click)="loadInvoices()">
+      <mat-icon>refresh</mat-icon>
+      Try Again
+    </button>
+  </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- EMPTY STATE -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  @if (!loading() && !error() && !hasInvoices()) {
+  <div class="empty-container">
+    <mat-icon>shopping_bag</mat-icon>
+    <h3>No orders yet</h3>
+    <p>When you place orders, they will appear here</p>
+    <button mat-flat-button color="primary" routerLink="/">
+      <mat-icon>shopping_cart</mat-icon>
+      Start Shopping
+    </button>
+  </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- INVOICES LIST/GRID -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  @if (!loading() && !error() && hasInvoices()) {
+  <div class="invoices-content" [class.list-view]="viewMode() === 'list'">
+
+    <!-- Active Filter Indicator -->
+    @if (filterStatus() !== null) {
+    <div class="active-filter-bar">
+      <span>
+        <mat-icon>filter_alt</mat-icon>
+        Showing: {{ activeFilterLabel() }} ({{ invoices().length }} orders)
+      </span>
+      <button mat-button (click)="clearFilters()">
+        <mat-icon>close</mat-icon>
+        Clear Filter
+      </button>
+    </div>
+    }
+
+    <!-- Invoice Cards -->
+    <div class="invoices-grid" [class.list-mode]="viewMode() === 'list'">
+      @for (invoice of invoices(); track trackByInvoice($index, invoice)) {
+      <div class="invoice-card" [class.expanded]="isExpanded(invoice.invoiceHeaderId)" matRipple>
+
+        <!-- Card Header -->
+        <div class="card-header" (click)="expandInvoice(invoice.invoiceHeaderId)">
+          <div class="invoice-info">
+            <div class="invoice-code">
+              <mat-icon>receipt</mat-icon>
+              <span>{{ invoice.invoiceCode }}</span>
+            </div>
+            <div class="invoice-date">
+              {{ formatDate(invoice.invoiceDate) }}
+            </div>
+          </div>
+
+          <div class="invoice-status">
+            <span class="status-badge" [style.background]="getStatusInfo(invoice.statusId).bgColor"
+              [style.color]="getStatusInfo(invoice.statusId).color">
+              <mat-icon>{{ getStatusInfo(invoice.statusId).icon }}</mat-icon>
+              {{ getStatusInfo(invoice.statusId).labelEN }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Card Summary -->
+        <div class="card-summary">
+          <div class="summary-row">
+            <span class="label">Items</span>
+            <span class="value">{{ getTotalItems(invoice) }} items</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="label">Total</span>
+            <span class="value total">{{ formatCurrency(invoice.net) }}</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="label">Payment</span>
+            <span class="value payment-status" [class]="getPaymentStatusClass(invoice)">
+              {{ getPaymentStatusLabel(invoice) }}
+            </span>
+          </div>
+
+          @if (invoice.customerAddressId) {
+          <div class="summary-row">
+            <span class="label">Type</span>
+            <span class="value">
+              <mat-icon class="small-icon">delivery_dining</mat-icon>
+              Delivery
+            </span>
+          </div>
+          } @else {
+          <div class="summary-row">
+            <span class="label">Type</span>
+            <span class="value">
+              <mat-icon class="small-icon">shopping_bag</mat-icon>
+              Pickup
+            </span>
+          </div>
+          }
+        </div>
+
+        <!-- Expanded Details -->
+        @if (isExpanded(invoice.invoiceHeaderId)) {
+        <div class="card-details">
+          <mat-divider></mat-divider>
+
+          <!-- Items List -->
+          <div class="details-section">
+            <h4>
+              <mat-icon>inventory_2</mat-icon>
+              Order Items
+            </h4>
+
+            <div class="items-list">
+              @for (line of invoice.lines; track trackByLine($index, line)) {
+              <div class="item-row">
+                <div class="item-info">
+                  <span class="item-name">{{ line.itemEnglishName }}</span>
+                  <span class="item-name-ar">{{ line.itemArabicName }}</span>
+                  <span class="item-unit">{{ line.uniEnglishName }}</span>
+                </div>
+                <div class="item-qty">x{{ line.qty }}</div>
+                <div class="item-price">{{ formatCurrency(line.net) }}</div>
+              </div>
+              }
+            </div>
+          </div>
+
+          <!-- Price Breakdown -->
+          <div class="details-section">
+            <h4>
+              <mat-icon>calculate</mat-icon>
+              Price Breakdown
+            </h4>
+
+            <div class="price-breakdown">
+              <div class="price-row">
+                <span>Subtotal</span>
+                <span>{{ formatCurrency(invoice.totalPrice) }}</span>
+              </div>
+
+              @if (invoice.disconutValue > 0) {
+              <div class="price-row discount">
+                <span>Discount ({{ invoice.discountPrecent }}%)</span>
+                <span>-{{ formatCurrency(invoice.disconutValue) }}</span>
+              </div>
+              }
+
+              @if (invoice.customerAddressId) {
+              @if (invoice.deliveryDate) {
+              <div class="price-row">
+                <span>Delivery date</span>
+                <span>{{ formatDate(invoice.deliveryDate) }}</span>
+              </div>
+              }
+
+              @if ((invoice.deliveryCharge ?? 0) > 0) {
+              <div class="price-row">
+                <span>Delivery charge</span>
+                <span>{{ formatCurrency(invoice.deliveryCharge ?? 0) }}</span>
+              </div>
+              }
+              }
+
+              <div class="price-row total">
+                <span>Total</span>
+                <span>
+                  {{
+                  formatCurrency(
+                  invoice.totalPrice
+                  - invoice.disconutValue
+                  + (invoice.customerAddressId ? (invoice.deliveryCharge ?? 0) : 0)
+                  )
+                  }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+
+
+          <!-- Payment Info -->
+          <div class="details-section">
+            <h4>
+              <mat-icon>payment</mat-icon>
+              Payment Information
+            </h4>
+
+            @if (invoice.payments.length > 0) {
+            <div class="payments-list">
+              @for (payment of invoice.payments; track trackByPayment($index, payment)) {
+              <div class="payment-row">
+                <div class="payment-info">
+                  <mat-icon>credit_card</mat-icon>
+                  <span>{{ payment.paymentTypeEnglishName }}</span>
+                </div>
+                <span class="payment-amount">{{ formatCurrency(payment.amount) }}</span>
+              </div>
+              }
+
+              @if (getRemainingAmount(invoice) > 0) {
+              <div class="payment-row remaining">
+                <div class="payment-info">
+                  <mat-icon>pending</mat-icon>
+                  <span>Remaining</span>
+                </div>
+                <span class="payment-amount">{{ formatCurrency(getRemainingAmount(invoice)) }}</span>
+              </div>
+              }
+            </div>
+            } @else {
+            <div class="no-payment">
+              <mat-icon>info</mat-icon>
+              <span>Payment pending - Check WhatsApp for payment link</span>
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Card Actions -->
+        <div class="card-actions">
+          <button mat-button (click)="expandInvoice(invoice.invoiceHeaderId); $event.stopPropagation()">
+            <mat-icon>{{ isExpanded(invoice.invoiceHeaderId) ? 'expand_less' : 'expand_more' }}</mat-icon>
+            {{ isExpanded(invoice.invoiceHeaderId) ? 'Less Details' : 'More Details' }}
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+</div>

@@ -1,0 +1,247 @@
+<!-- 
+<div
+  class="policy-hero text-white d-flex flex-column justify-content-center align-items-center mb-5"
+>
+  <h1 class="display-5 fw-bold">Privacy Policy</h1>
+  <p class="small opacity-75">Last updated: 12 June 2025</p>
+</div>
+
+
+<div class="container-lg">
+  <div class="accordion policy-accordion shadow-sm" id="policyAccordion">
+    <div class="accordion-item" *ngFor="let item of sections">
+      <h2 class="accordion-header">
+        <button
+          class="accordion-button collapsed fw-semibold"
+          type="button"
+          data-bs-toggle="collapse"
+          [attr.data-bs-target]="'#' + item.id"
+          aria-expanded="false"
+        >
+          {{ item.title }}
+        </button>
+      </h2>
+
+      <div
+        [id]="item.id"
+        class="accordion-collapse collapse"
+        data-bs-parent="#policyAccordion"
+      >
+        <div class="accordion-body" [innerHTML]="item.body"></div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+
+<!-- Hero Banner -->
+<div class="policy-hero text-white d-flex flex-column justify-content-center align-items-center mb-5">
+  <div class="hero-content text-center">
+    <h1 class="display-4 fw-bold mb-3">
+      <i class="bi bi-shield-check me-3"></i>Privacy Policy
+    </h1>
+    <p class="lead mb-2">Your privacy matters to us</p>
+    <div class="policy-meta">
+      <span class="badge bg-light text-dark me-2">
+        <i class="bi bi-calendar3 me-1"></i>Last updated: {{ lastUpdated }}
+      </span>
+      <span class="badge bg-light text-dark me-2">
+        <i class="bi bi-file-text me-1"></i>Version {{ version }}
+      </span>
+      <span class="badge bg-light text-dark">
+        <i class="bi bi-calendar-check me-1"></i>Effective: {{ effectiveDate }}
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Navigation & Actions -->
+<div class="container-lg mb-4">
+  <div class="policy-controls card shadow-sm p-3">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <div class="quick-nav">
+          <h6 class="fw-bold mb-2 text-muted">Quick Navigation:</h6>
+          <div class="nav-links">
+            <a 
+              *ngFor="let section of sections; let i = index" 
+              class="btn btn-outline-secondary btn-sm me-2 mb-2"
+              [href]="'#' + section.id"
+              [title]="section.title"
+            >
+              <i class="bi {{ section.icon }} me-1"></i>
+              {{ i + 1 }}
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 text-end">
+        <div class="policy-actions">
+          <button 
+            class="btn btn-outline-primary btn-sm me-2" 
+            (click)="expandAll()"
+            title="Expand all sections"
+          >
+            <i class="bi bi-arrows-expand me-1"></i>Expand All
+          </button>
+          <button 
+            class="btn btn-outline-secondary btn-sm me-2" 
+            (click)="collapseAll()"
+            title="Collapse all sections"
+          >
+            <i class="bi bi-arrows-collapse me-1"></i>Collapse
+          </button>
+          <button 
+            class="btn btn-outline-info btn-sm" 
+            (click)="printPolicy()"
+            title="Print policy"
+          >
+            <i class="bi bi-printer me-1"></i>Print
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="container-lg">
+  <!-- Policy Summary Card -->
+  <div class="policy-summary card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-8">
+          <h5 class="card-title fw-bold">
+            <i class="bi bi-info-circle text-primary me-2"></i>Policy Summary
+          </h5>
+          <p class="card-text">
+            This policy covers how we collect, use, and protect your personal information when you use our services. 
+            We're committed to transparency and giving you control over your data.
+          </p>
+        </div>
+        <div class="col-md-4">
+          <div class="summary-stats">
+            <div class="stat-item mb-2">
+              <i class="bi bi-file-text  me-2"></i>
+              <small >{{ sections.length }} sections</small>
+            </div>
+            <div class="stat-item mb-2">
+              <i class="bi bi-clock  me-2"></i>
+              <small>~15 min read</small>
+            </div>
+            <div class="stat-item">
+              <i class="bi bi-translate  me-2"></i>
+              <small>Available in English</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Policy Accordion -->
+  <div class="accordion policy-accordion shadow-sm" id="policyAccordion">
+    <div 
+      class="accordion-item" 
+      *ngFor="let section of sections; trackBy: trackBySection"
+      [id]="'section-' + section.id"
+    >
+      <!-- Accordion Header -->
+      <h2 class="accordion-header">
+        <button
+          class="accordion-button fw-semibold"
+          [class.collapsed]="!isSectionExpanded(section.id)"
+          type="button"
+          (click)="toggleSection(section.id)"
+          [attr.aria-expanded]="isSectionExpanded(section.id)"
+          [attr.aria-controls]="section.id + '-content'"
+        >
+          <i class="bi {{ section.icon }} me-3 text-primary"></i>
+          <span class="section-title">{{ section.title }}</span>
+          <span class="ms-auto">
+            <small  *ngIf="section.lastUpdated">
+              Updated: {{ section.lastUpdated }}
+            </small>
+          </span>
+        </button>
+      </h2>
+
+      <!-- Accordion Content -->
+      <div
+        [id]="section.id + '-content'"
+        class="accordion-collapse collapse"
+        [class.show]="isSectionExpanded(section.id)"
+        [attr.aria-labelledby]="section.id + '-header'"
+      >
+        <div class="accordion-body">
+          <div class="policy-content" [innerHTML]="section.body"></div>
+          
+          <!-- Section Footer -->
+          <div class="section-footer mt-4 pt-3 border-top">
+            <div class="row align-items-center">
+              <div class="col-md-6">
+                <small>
+                  <i class="bi bi-clock me-1"></i>
+                  Last updated: {{ section.lastUpdated || lastUpdated }}
+                </small>
+              </div>
+              <div class="col-md-6 text-end">
+                <button 
+                  class="btn btn-outline-primary btn-sm"
+                  *ngIf="section.id === 'contact-support'"
+                  [routerLink]="['/contact']"
+                >
+                  <i class="bi bi-envelope me-1"></i>Contact Us
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="policy-footer card shadow-sm mt-4 mb-5">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h6 class="fw-bold mb-2">Still have questions about our privacy practices?</h6>
+          <p class="small text-privacy mb-0">
+            Our privacy team is here to help. Contact us anytime for clarification or to exercise your privacy rights.
+          </p>
+        </div>
+        <div class="col-md-4 text-end">
+          <a 
+            [href]="'mailto:' + contactInfo.email" 
+            class="btn btn-primary me-2"
+          >
+            <i class="bi bi-envelope me-2"></i>Email Privacy Team
+          </a>
+          <button 
+            class="btn btn-outline-secondary"
+            [routerLink]="['/contact']"
+          >
+            <i class="bi bi-chat-dots me-2"></i>Contact Form
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legal Notice -->
+  <div class="legal-notice text-center py-4 border-top">
+    <div class="row">
+      <div class="col-md-8 mx-auto">
+        <p class="small  mb-4">
+          <strong>Legal Notice:</strong> This privacy policy constitutes a legally binding agreement between you and OurStore LLC. 
+          By using our services, you acknowledge that you have read, understood, and agree to be bound by this policy.
+        </p>
+        <p class="small  mb-0">
+          <i class="bi bi-building me-1"></i>
+          {{ contactInfo.address }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

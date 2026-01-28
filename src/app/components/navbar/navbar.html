@@ -1,0 +1,329 @@
+<!-- src/app/components/navbar/navbar.html -->
+<nav class="navbar navbar-expand-lg fixed-top shadow" [class.bg-dark]="isBsDark" [class.bg-body-tertiary]="!isBsDark"
+  [attr.data-bs-theme]="isBsDark ? 'dark' : null">
+  <div class="container-fluid">
+
+    <!-- Mobile Toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Brand -->
+    <a class="navbar-brand ms-auto" routerLink="/">E-Shop</a>
+
+    <!-- Mobile Cart (Always Visible) -->
+    <ul class="navbar-nav ms-auto d-block d-lg-none">
+      <li class="nav-item me-3 position-relative">
+        <a class="nav-link d-flex align-items-center gap-1" routerLink="/cart">
+          <i class="fa fa-shopping-cart"></i>
+          <span>Cart</span>
+
+          <!-- Cart Badge -->
+          <ng-container *ngIf="cartQty$ | async as q">
+            <span *ngIf="q > 0" class="badge rounded-pill bg-danger ms-1">
+              {{ q > 99 ? '99+' : q }}
+            </span>
+          </ng-container>
+
+          <!-- Guest Indicator -->
+          <span *ngIf="hasGuestItems && !(loggedIn$ | async)" class="badge rounded-pill bg-warning text-dark ms-1"
+            title="Items saved locally">
+            <i class="bi bi-cloud-slash-fill"></i>
+          </span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Collapsible Content -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+
+      <!-- Main Navigation -->
+      <div class="d-flex mx-auto">
+        <ul class="navbar-nav mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+              ariaCurrentWhenActive="page" (click)="closeIfMobile()">
+              Home
+            </a>
+          </li>
+
+          <!-- Categories Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              All Products
+            </a>
+            <ul class="dropdown-menu category-scroll">
+              <li *ngFor="let category of categories$ | async">
+                <a class="dropdown-item" [routerLink]="['/category', category.id]" routerLinkActive="active"
+                  (click)="closeIfMobile()">
+                  {{ category.name }}
+                </a>
+              </li>
+              <li *ngIf="(categories$ | async)?.length === 0">
+                <span class="dropdown-item text-muted">No categories</span>
+              </li>
+            </ul>
+          </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link" routerLink="/booking-category" routerLinkActive="active" (click)="closeIfMobile()">
+              Service
+            </a>
+          </li> -->
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/contact" routerLinkActive="active" (click)="closeIfMobile()">
+              Contact Us
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/about" routerLinkActive="active" (click)="closeIfMobile()">
+              About Us
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/privacy-policy" routerLinkActive="active" (click)="closeIfMobile()">
+              Privacy Policy
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Desktop Search -->
+      <form class="search-box d-none d-lg-flex align-items-center" role="search" (submit)="$event.preventDefault()">
+        <div class="input-wrapper flex-grow-1 position-relative">
+          <input type="search" class="form-control" placeholder="Search product" aria-label="Search"
+            [formControl]="searchCtrl" (focus)="searchOpen = true" (blur)="searchOpen = false" />
+
+          <!-- Clear Button -->
+          <button *ngIf="searchCtrl.value" type="button" class="btn clear-btn" (mousedown)="$event.preventDefault()"
+            (click)="searchCtrl.setValue('')">
+            <i class="bi bi-x-lg"></i>
+          </button>
+
+          <!-- Search Icon -->
+          <i class="bi bi-search loupe"></i>
+
+          <!-- Results Panel -->
+          <div class="result-panel shadow-sm" *ngIf="results$ | async as items">
+            <ng-container *ngIf="items.length; else noResTmpl">
+              <div class="result-item d-flex" *ngFor="let p of items" [routerLink]="['/product', p.itemId]"
+                (mousedown)="$event.preventDefault()" (click)="onSearchResultClick()">
+                <img [src]="p.fullImageUrl" width="48" height="48" [alt]="p.englishName"
+                  onerror="this.src='assets/images/placeholder.jpg'" />
+                <div class="flex-grow-1 ms-2">
+                  <h6 class="title mb-0">{{ p.englishName }}</h6>
+                  <small class="text-muted d-block text-truncate" style="max-width:165px;">
+                    {{ p.unitEnglishName }}
+                  </small>
+                  <span class="price">{{ p.price | number:'1.3-3' }} KWD</span>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-template #noResTmpl>
+              <div class="no-res text-center text-muted py-4">
+                <i class="bi bi-search fs-4 d-block mb-2"></i>
+                No search results
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </form>
+
+      <!-- Desktop Right Navigation -->
+      <ul class="navbar-nav ms-auto d-none d-lg-flex align-items-center">
+
+        <!-- Cart (Desktop) -->
+        <li class="nav-item me-3 position-relative">
+          <a class="nav-link d-flex align-items-center gap-1 cart-link" routerLink="/cart"
+            [class.syncing]="isSyncing$ | async">
+            <i class="fa fa-shopping-cart"></i>
+            <span>Cart</span>
+
+            <!-- Qty Badge -->
+            <ng-container *ngIf="cartQty$ | async as q">
+              <span *ngIf="q > 0" class="badge rounded-pill bg-danger ms-1">
+                {{ q > 99 ? '99+' : q }}
+              </span>
+            </ng-container>
+
+            <!-- Syncing Indicator -->
+            <span *ngIf="isSyncing$ | async" class="spinner-border spinner-border-sm ms-1" role="status">
+              <span class="visually-hidden">Syncing...</span>
+            </span>
+
+            <!-- Guest Cart Indicator -->
+            <span *ngIf="hasGuestItems && !(loggedIn$ | async)" class="guest-indicator"
+              title="Shopping as guest - login to sync">
+              <i class="bi bi-person-badge"></i>
+            </span>
+          </a>
+        </li>
+
+        <!-- User Menu (Logged In) -->
+        <ng-container *ngIf="loggedIn$ | async; else guestLinks">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false" aria-label="My Account">
+              <i class="bi bi-person-circle fs-5"></i>
+              <span class="d-none d-xl-inline">{{ (userName || '').substring(0, (userName || '').indexOf('@')) }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <span class="dropdown-item-text text-muted small">
+                  Signed in as <strong>{{ userName }}</strong>
+                </span>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <a routerLink="/profile" routerLinkActive="active"
+                  class="dropdown-item d-flex align-items-center gap-2">
+                  <i class="bi bi-person-badge"></i>
+                  <span>Profile</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" routerLink="/booking-billing" routerLinkActive="active">
+                  <i class="bi bi-box-seam"></i>
+                  <span>My Booking</span>
+                </a>
+              </li>
+              <!-- <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" routerLink="/orders" routerLinkActive="active">
+                  <i class="bi bi-box-seam"></i>
+                  <span>My Orders</span>
+                </a>
+              </li> -->
+              <!-- <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" routerLink="/wishlist"
+                  routerLinkActive="active">
+                  <i class="bi bi-heart"></i>
+                  <span>Wishlist</span>
+                </a>
+              </li> -->
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <button class="dropdown-item d-flex align-items-center gap-2 text-danger" type="button"
+                  (click)="logout()">
+                  <i class="bi bi-box-arrow-right"></i>
+                  <span>Logout</span>
+                </button>
+              </li>
+            </ul>
+          </li>
+        </ng-container>
+
+        <!-- Guest Links -->
+        <ng-template #guestLinks>
+          <li class="nav-item">
+            <a routerLink="/login" class="nav-link">
+              <i class="bi bi-box-arrow-in-right me-1"></i>
+              Login
+            </a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/register" class="nav-link">
+              <i class="bi bi-person-plus me-1"></i>
+              Register
+            </a>
+          </li>
+        </ng-template>
+      </ul>
+
+      <!-- Mobile Menu Items -->
+      <ul class="navbar-nav d-block d-lg-none">
+        <ng-container *ngIf="loggedIn$ | async; else mobileGuest">
+          <!-- Logged In Mobile -->
+          <li class="nav-item">
+            <span class="nav-link text-muted small">
+              Hello, {{ userName }}
+            </span>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/profile" class="nav-link" (click)="closeIfMobile()">
+              <i class="bi bi-person-badge me-2"></i>Profile
+            </a>
+          </li>
+          <!-- <li class="nav-item">
+            <a routerLink="/orders" class="nav-link" (click)="closeIfMobile()">
+              <i class="bi bi-box-seam me-2"></i>My Orders
+            </a>
+          </li> -->
+          <li class="nav-item">
+            <button class="nav-link text-danger w-100 text-start" type="button" (click)="logout()">
+              <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+          </li>
+        </ng-container>
+
+        <ng-template #mobileGuest>
+          <!-- Not Logged In Mobile -->
+          <li class="nav-item">
+            <a routerLink="/login" class="nav-link" (click)="closeIfMobile()">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/register" class="nav-link" (click)="closeIfMobile()">
+              <i class="bi bi-person-plus me-2"></i>Register
+            </a>
+          </li>
+        </ng-template>
+      </ul>
+
+      <!-- Language Switcher -->
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown"
+            aria-expanded="false" aria-label="Select Language">
+            <i class="bi bi-globe fs-5"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+            <li>
+              <a class="dropdown-item active" href="#" (click)="$event.preventDefault(); closeIfMobile()">
+                <span class="me-2">🇺🇸</span> EN - English
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#" (click)="$event.preventDefault(); closeIfMobile()">
+                <span class="me-2">🇸🇦</span> AR - العربية
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Theme Selector -->
+      <!-- <select class="form-select form-select-sm w-auto ms-2 theme-desktop" [value]="selectedTheme"
+        (change)="onThemeChange($event)" aria-label="Select theme">
+        <option value="light">🌞 Light</option>
+        <option value="orange">🟠 Orange</option>
+        <option value="dark">🌑 Dark</option>
+        <option value="blue">🔵 Blue</option>
+        <option value="green">🟢 Green</option>
+        <option value="blue-dark">🧿 Blue Dark</option>
+        <option value="green-dark">🌲 Green Dark</option>
+        <option value="velvet-rose">🌸 Velvet Rose</option>
+        <option value="velvet-rose-dark">🌹 Velvet Rose Dark</option>
+        <option value="graphite-mist">🪨 Graphite Mist</option>
+        <option value="graphite-mist-dark">🌫️ Graphite Mist Dark</option>
+      </select> -->
+    </div>
+  </div>
+</nav>
+
+<!-- Cart Sync Toast (Fixed Position) -->
+<div *ngIf="isSyncing$ | async" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+  <div class="toast show align-items-center text-bg-primary border-0">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center gap-2">
+        <span class="spinner-border spinner-border-sm"></span>
+        Syncing your cart...
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,423 @@
+<!-- src/app/pages/booking-billing/booking-billing.html -->
+<div class="bookings-container">
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- HEADER -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="bookings-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>My Bookings</h1>
+        <p>Track and manage your appointments</p>
+      </div>
+
+      <div class="header-actions">
+        <button mat-icon-button (click)="refreshBookings()" [disabled]="loading()" matTooltip="Refresh">
+          <mat-icon>refresh</mat-icon>
+        </button>
+
+        <button mat-icon-button (click)="toggleViewMode()" matTooltip="Toggle View">
+          <mat-icon>{{ viewMode() === 'grid' ? 'view_list' : 'grid_view' }}</mat-icon>
+        </button>
+
+        <button mat-icon-button (click)="toggleFilters()" matTooltip="Toggle Filters">
+          <mat-icon>filter_list</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <mat-icon>calendar_month</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().total }}</span>
+          <span class="stat-label">Total Bookings</span>
+        </div>
+      </div>
+
+      <div class="stat-card upcoming">
+        <mat-icon>upcoming</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().upcoming }}</span>
+          <span class="stat-label">Upcoming</span>
+        </div>
+      </div>
+
+      <div class="stat-card success">
+        <mat-icon>check_circle</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().confirmed }}</span>
+          <span class="stat-label">Confirmed</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <mat-icon>payments</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ formatCurrency(stats().totalDeposit) }}</span>
+          <span class="stat-label">Total Deposits</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- FILTERS -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  @if (showFilters()) {
+  <div class="filters-section">
+    <div class="filter-chips">
+      <button mat-stroked-button [class.active]="isFilterActive(null)" (click)="setFilter(null)">
+        <mat-icon>all_inbox</mat-icon>
+        All
+        <span class="chip-badge">{{ stats().total }}</span>
+      </button>
+
+      @for (status of getAllStatuses(); track trackByStatus($index, status)) {
+      <button mat-stroked-button [class.active]="isFilterActive(status.id)" [style.--status-color]="status.color"
+        (click)="setFilter(status.id)">
+        <mat-icon [style.color]="status.color">{{ status.icon }}</mat-icon>
+        {{ status.labelEN }}
+        @if (getStatusCount(status.id) > 0) {
+        <span class="chip-badge" [style.background]="status.color">
+          {{ getStatusCount(status.id) }}
+        </span>
+        }
+      </button>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- LOADING STATE -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  @if (loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading your bookings...</p>
+  </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- ERROR STATE -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  @if (error()) {
+  <div class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <h3>Failed to load bookings</h3>
+    <p>{{ error() }}</p>
+    <button mat-flat-button color="primary" (click)="loadBookings()">
+      <mat-icon>refresh</mat-icon>
+      Try Again
+    </button>
+  </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- EMPTY STATE -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  @if (!loading() && !error() && !hasBookings()) {
+  <div class="empty-container">
+    <mat-icon>event_busy</mat-icon>
+    <h3>No bookings yet</h3>
+    <p>When you make appointments, they will appear here</p>
+    <button mat-flat-button color="primary" routerLink="/booking-category">
+      <mat-icon>add_circle</mat-icon>
+      Book Now
+    </button>
+  </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- BOOKINGS LIST/GRID -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  @if (!loading() && !error() && hasBookings()) {
+  <div class="bookings-content" [class.list-view]="viewMode() === 'list'">
+
+    <!-- Active Filter Indicator -->
+    @if (filterStatus() !== null) {
+    <div class="active-filter-bar">
+      <span>
+        <mat-icon>filter_alt</mat-icon>
+        Showing: {{ activeFilterLabel() }} ({{ sortedBookings().length }} bookings)
+      </span>
+      <button mat-button (click)="clearFilters()">
+        <mat-icon>close</mat-icon>
+        Clear Filter
+      </button>
+    </div>
+    }
+
+    <!-- Booking Cards -->
+    <div class="bookings-grid" [class.list-mode]="viewMode() === 'list'">
+      @for (booking of sortedBookings(); track trackByBooking($index, booking)) {
+      <div class="booking-card" [class.expanded]="isExpanded(booking.id)" 
+           [class.upcoming]="isUpcoming(booking)" matRipple>
+
+        <!-- Card Header -->
+        <div class="card-header" (click)="expandBooking(booking.id)">
+          <div class="booking-info">
+            <div class="booking-code">
+              <mat-icon>confirmation_number</mat-icon>
+              <span>{{ booking.code }}</span>
+              <button mat-icon-button class="copy-btn" (click)="copyBookingCode(booking.code); $event.stopPropagation()" matTooltip="Copy Code">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </div>
+            <div class="booking-date">
+              <mat-icon class="small-icon">event</mat-icon>
+              {{ formatDate(booking.startDate) }}
+              <span class="time-badge">
+                <mat-icon class="small-icon">schedule</mat-icon>
+                {{ formatTime(booking.startDate) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="booking-status">
+            <span class="status-badge" [style.background]="getStatusInfo(booking.status).bgColor"
+              [style.color]="getStatusInfo(booking.status).color">
+              <mat-icon>{{ getStatusInfo(booking.status).icon }}</mat-icon>
+              {{ getStatusInfo(booking.status).labelEN }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Card Summary -->
+        <div class="card-summary">
+          <div class="summary-row">
+            <span class="label">Staff</span>
+            <span class="value">
+              <mat-icon class="small-icon">person</mat-icon>
+              {{ booking.staffEnglishName }}
+            </span>
+          </div>
+
+          <div class="summary-row">
+            <span class="label">Branch</span>
+            <span class="value">
+              <mat-icon class="small-icon">store</mat-icon>
+              {{ booking.branchEnglishName }}
+            </span>
+          </div>
+
+          <div class="summary-row">
+            <span class="label">Service Type</span>
+            <span class="value">
+              <mat-icon class="small-icon">{{ getPlaceTypeIcon(booking.placeType) }}</mat-icon>
+              {{ getPlaceTypeLabel(booking.placeType) }}
+            </span>
+          </div>
+
+          <div class="summary-row">
+            <span class="label">Deposit</span>
+            <span class="value total">{{ formatCurrency(booking.depositAmount) }}</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="label">Persons</span>
+            <span class="value">
+              <mat-icon class="small-icon">group</mat-icon>
+              {{ booking.nofPersons }}
+            </span>
+          </div>
+
+          <div class="summary-row">
+            <span class="label">Verification</span>
+            <span class="value verification-status" [class]="getVerificationStatusClass(booking)">
+              {{ getVerificationStatusLabel(booking) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Upcoming Badge -->
+        @if (isUpcoming(booking) && (booking.status === 0 || booking.status === 2)) {
+        <div class="upcoming-badge">
+          <mat-icon>event_available</mat-icon>
+          <span>Upcoming Appointment</span>
+        </div>
+        }
+
+        <!-- Needs Verification Alert -->
+        @if (needsVerification(booking)) {
+        <div class="verification-alert">
+          <mat-icon>warning</mat-icon>
+          <span>This booking needs OTP verification</span>
+        </div>
+        }
+
+        <!-- Expanded Details -->
+        @if (isExpanded(booking.id)) {
+        <div class="card-details">
+          <mat-divider></mat-divider>
+
+          <!-- Booking Details -->
+          <div class="details-section">
+            <h4>
+              <mat-icon>info</mat-icon>
+              Booking Details
+            </h4>
+
+            <div class="details-grid">
+              <div class="detail-item">
+                <span class="detail-label">Booking ID</span>
+                <span class="detail-value">#{{ booking.id }}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label">Category</span>
+                <span class="detail-value">{{ booking.categoryEnglishName }}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label">Start Time</span>
+                <span class="detail-value">{{ formatDateTime(booking.startDate) }}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label">End Time</span>
+                <span class="detail-value">{{ formatDateTime(booking.endDate) }}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label">Booked On</span>
+                <span class="detail-value">{{ formatDateTime(booking.addedDate) }}</span>
+              </div>
+
+              @if (booking.modifiedDate) {
+              <div class="detail-item">
+                <span class="detail-label">Last Modified</span>
+                <span class="detail-value">{{ formatDateTime(booking.modifiedDate) }}</span>
+              </div>
+              }
+            </div>
+          </div>
+
+          <!-- Staff Info -->
+          <div class="details-section">
+            <h4>
+              <mat-icon>person</mat-icon>
+              Staff Information
+            </h4>
+
+            <div class="staff-info-card">
+              <div class="staff-avatar">
+                <mat-icon>account_circle</mat-icon>
+              </div>
+              <div class="staff-details">
+                <span class="staff-name">{{ booking.staffEnglishName }}</span>
+                <span class="staff-name-ar">{{ booking.staffArabicName }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Branch Info -->
+          <div class="details-section">
+            <h4>
+              <mat-icon>location_on</mat-icon>
+              Branch Information
+            </h4>
+
+            <div class="branch-info-card">
+              <mat-icon>store</mat-icon>
+              <div class="branch-details">
+                <span class="branch-name">{{ booking.branchEnglishName }}</span>
+                <span class="branch-name-ar">{{ booking.branchArabicName }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Info -->
+          <div class="details-section">
+            <h4>
+              <mat-icon>payment</mat-icon>
+              Payment Information
+            </h4>
+
+            <div class="payment-breakdown">
+              <div class="payment-row">
+                <span>Deposit Amount</span>
+                <span class="amount">{{ formatCurrency(booking.depositAmount) }}</span>
+              </div>
+
+              <div class="payment-row">
+                <span>Payment Status</span>
+                <span class="payment-status" [class]="getPaymentStatusClass(booking)">
+                  {{ getPaymentStatusLabel(booking) }}
+                </span>
+              </div>
+
+              <div class="payment-row">
+                <span>Full Payment</span>
+                <span>{{ booking.isFullPayment ? 'Yes' : 'No' }}</span>
+              </div>
+
+              @if (booking.paymentLink) {
+              <div class="payment-link-row">
+                <a [href]="booking.paymentLink" target="_blank" mat-stroked-button color="primary">
+                  <mat-icon>payment</mat-icon>
+                  Complete Payment
+                </a>
+              </div>
+              }
+            </div>
+          </div>
+
+          <!-- Notes -->
+          @if (booking.notes) {
+          <div class="details-section">
+            <h4>
+              <mat-icon>notes</mat-icon>
+              Notes
+            </h4>
+            <div class="notes-content">
+              {{ booking.notes }}
+            </div>
+          </div>
+          }
+
+          <!-- Verification Status -->
+          <div class="details-section">
+            <h4>
+              <mat-icon>verified</mat-icon>
+              Verification Status
+            </h4>
+
+            <div class="verification-info">
+              @if (booking.otpIsVerified) {
+              <div class="verified-badge">
+                <mat-icon>check_circle</mat-icon>
+                <span>OTP Verified</span>
+              </div>
+              } @else {
+              <div class="not-verified-badge">
+                <mat-icon>pending</mat-icon>
+                <span>OTP Not Verified</span>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+        }
+
+        <!-- Card Actions -->
+        <div class="card-actions">
+          <button mat-button (click)="expandBooking(booking.id); $event.stopPropagation()">
+            <mat-icon>{{ isExpanded(booking.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
+            {{ isExpanded(booking.id) ? 'Less Details' : 'More Details' }}
+          </button>
+
+          @if (canCancel(booking)) {
+          <button mat-button color="warn" (click)="cancelBooking(booking); $event.stopPropagation()">
+            <mat-icon>cancel</mat-icon>
+            Cancel
+          </button>
+          }
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+</div>

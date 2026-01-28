@@ -1,0 +1,477 @@
+<!-- src/app/pages/booking/booking.html -->
+<div class="booking-page">
+  <div class="container py-4">
+
+    <!-- Header -->
+    <div class="booking-header text-center mb-4">
+      <h1 class="booking-title">Book Appointment</h1>
+      <p class="booking-subtitle" *ngIf="product()">
+        {{ product().englishName || product().arabicName }}
+      </p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="loading-container text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3 text-muted">Loading booking options...</p>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="!isLoading()" class="booking-content">
+
+      <!-- Step Indicator -->
+      <div class="booking-timeline">
+        <div class="timeline-track">
+          <div class="timeline-fill" [style.width]="((currentStep() - 1) / 2 * 100) + '%'"></div>
+        </div>
+
+        <div class="timeline-steps">
+          <!-- Step 1 -->
+          <div class="timeline-step" [class.active]="currentStep() === 1" [class.completed]="currentStep() > 1"
+            (click)="goToStep(1)">
+            <div class="timeline-dot">
+              <span class="dot-number" *ngIf="currentStep() <= 1">1</span>
+              <svg *ngIf="currentStep() > 1" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="timeline-info">
+              <h4 class="timeline-title">Select Staff</h4>
+              <p class="timeline-desc">Choose date & stylist</p>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="timeline-step" [class.active]="currentStep() === 2" [class.completed]="currentStep() > 2"
+            (click)="goToStep(2)">
+            <div class="timeline-dot">
+              <span class="dot-number" *ngIf="currentStep() <= 2">2</span>
+              <svg *ngIf="currentStep() > 2" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="timeline-info">
+              <h4 class="timeline-title">Details</h4>
+              <p class="timeline-desc">Service preferences</p>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="timeline-step" [class.active]="currentStep() === 3">
+            <div class="timeline-dot">
+              <span class="dot-number">3</span>
+            </div>
+            <div class="timeline-info">
+              <h4 class="timeline-title">Verify</h4>
+              <p class="timeline-desc">Confirm booking</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- STEP 1: Branch, Date, Staff Selection -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div class="step-content" *ngIf="currentStep() === 1">
+
+        <!-- Branch Selection -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            Select Branch
+          </h3>
+          <div class="branch-grid">
+            <div *ngFor="let branch of branches()" class="branch-card"
+              [class.selected]="bookingState().selectedBranchId === branch.id" (click)="selectBranch(branch.id)">
+              <div class="branch-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+              </div>
+              <span class="branch-name">{{ branch.englishName }}</span>
+              <span class="branch-name-ar">{{ branch.arabicName }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date Selection -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Select Date
+          </h3>
+          <input type="date" class="form-control date-input" [ngModel]="bookingState().selectedDate"
+            (ngModelChange)="updateBookingState({ selectedDate: $event }); onDateChange()" [min]="minDate()">
+        </div>
+
+        <!-- Staff Selection -->
+        <!-- Staff Selection -->
+        <div class="form-section" *ngIf="bookingState().selectedBranchId">
+          <h3 class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Select Staff
+          </h3>
+
+          <!-- Loading Staff -->
+          <div *ngIf="isLoadingStaff()" class="staff-loading">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+            <span>Loading available staff...</span>
+          </div>
+
+          <!-- Staff Dropdown -->
+          <div *ngIf="!isLoadingStaff() && staffList().length > 0" class="staff-dropdown-wrapper"
+            (clickOutside)="closeStaffDropdown()">
+
+            <!-- Dropdown Trigger -->
+            <div class="staff-dropdown-trigger" [class.open]="staffDropdownOpen()"
+              [class.has-selection]="selectedStaff()" (click)="toggleStaffDropdown()">
+
+              <!-- Placeholder or Selected Staff -->
+              <div class="trigger-content">
+                <ng-container *ngIf="!selectedStaff()">
+                  <div class="placeholder-avatar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                  <span class="placeholder-text">Choose a staff member</span>
+                </ng-container>
+
+                <ng-container *ngIf="selectedStaff()">
+                  <img class="selected-avatar" [src]="getStaffImageUrl(selectedStaff()!)"
+                    [alt]="selectedStaff()!.englishName" onerror="this.src='assets/images/staff-placeholder.jpg'">
+                  <div class="selected-info">
+                    <span class="selected-name">{{ selectedStaff()!.englishName }}</span>
+                    <span class="selected-name-ar">{{ selectedStaff()!.arabicName }}</span>
+                  </div>
+                  <span class="availability-tag available">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Available
+                  </span>
+                </ng-container>
+              </div>
+
+              <!-- Dropdown Arrow -->
+              <svg class="dropdown-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+
+            <!-- Dropdown Menu -->
+            <div class="staff-dropdown-menu" [class.open]="staffDropdownOpen()">
+              <div class="dropdown-scroll">
+                <div *ngFor="let staff of staffList()" class="staff-option"
+                  [class.selected]="bookingState().selectedStaffId === staff.id"
+                  [class.unavailable]="!staff.isAvailable" (click)="selectStaff(staff)">
+
+                  <img class="staff-avatar" [src]="getStaffImageUrl(staff)" [alt]="staff.englishName"
+                    onerror="this.src='assets/images/staff-placeholder.jpg'">
+
+                  <div class="staff-details">
+                    <span class="staff-name">{{ staff.englishName }}</span>
+                    <span class="staff-name-ar">{{ staff.arabicName }}</span>
+                  </div>
+
+                  <span class="availability-tag" [class.available]="staff.isAvailable">
+                    <svg *ngIf="staff.isAvailable" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <svg *ngIf="!staff.isAvailable" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="3">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    {{ staff.isAvailable ? 'Available' : 'Busy' }}
+                  </span>
+
+                  <!-- Selected Check -->
+                  <div class="selected-check" *ngIf="bookingState().selectedStaffId === staff.id">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Staff -->
+          <div *ngIf="!isLoadingStaff() && staffList().length === 0" class="empty-state">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <p class="empty-title">No staff available</p>
+            <p class="empty-desc">Try selecting a different date</p>
+          </div>
+        </div>
+
+        <!-- Next Button -->
+        <div class="form-actions">
+          <button class="btn btn-booking btn-lg w-100" [disabled]="!canProceedStep1()" (click)="nextStep()">
+            Continue
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- STEP 2: Service Details -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div class="step-content" *ngIf="currentStep() === 2">
+
+        <!-- Summary Card -->
+        <div class="summary-card mb-4">
+          <div class="summary-item">
+            <span class="label">Branch:</span>
+            <span class="value">{{ selectedBranch()?.englishName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Date:</span>
+            <span class="value">{{ bookingState().selectedDate | date:'fullDate' }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Staff:</span>
+            <span class="value">{{ selectedStaff()?.englishName }}</span>
+          </div>
+          <div class="summary-item" *ngIf="product()">
+            <span class="label">Service:</span>
+            <span class="value">
+              {{ product().englishName || product().itemEnglishName }}
+              <ng-container *ngIf="selectedUnit()">
+                ({{ selectedUnit().englishName }}) - {{ selectedUnit().itemUnitPrice }} {{ currencySymbol() }}
+              </ng-container>
+              <ng-container *ngIf="!selectedUnit()">
+                - {{ product().price }} {{ currencySymbol() }}
+              </ng-container>
+            </span>
+          </div>
+        </div>
+
+        <!-- Service Type -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 8v8"></path>
+              <path d="M8 12h8"></path>
+            </svg>
+            Service Type
+          </h3>
+          <div class="service-type-grid">
+            <div class="service-type-card" [class.selected]="bookingState().serviceType === 0"
+              (click)="selectServiceType(0)">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              <span>Salon</span>
+            </div>
+            <div class="service-type-card" [class.selected]="bookingState().serviceType === 1"
+              (click)="selectServiceType(1)">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span>Home Service</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Location (if Salon) -->
+        <div class="form-section" *ngIf="bookingState().serviceType === 0 && bookingLocations().length > 0">
+          <h3 class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            Select Location
+          </h3>
+          <div class="location-grid">
+            <div *ngFor="let location of bookingLocations()" class="location-card"
+              [class.selected]="bookingState().selectedLocationId === location.id"
+              (click)="selectLocation(location.id)">
+              <span>{{ location.englishName }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Number of Persons -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Number of Persons
+          </h3>
+          <div class="qty-control">
+            <button class="qty-btn" (click)="decrementPersons()" [disabled]="bookingState().noOfPersons <= 1">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <span class="qty-value">{{ bookingState().noOfPersons }}</span>
+            <button class="qty-btn" (click)="incrementPersons()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            Notes (Optional)
+          </h3>
+          <textarea class="form-control notes-input" rows="3" placeholder="Any special requests or notes..."
+            [ngModel]="bookingState().notes" (ngModelChange)="updateBookingState({ notes: $event })"></textarea>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="payment-info" *ngIf="!isFullPayment()">
+          <div class="payment-badge">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+              <line x1="1" y1="10" x2="23" y2="10"></line>
+            </svg>
+            <span>Deposit Required: <strong>{{ depositAmount() }} {{ currencySymbol() }}</strong></span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button class="btn btn-outline-secondary btn-lg" (click)="prevStep()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back
+          </button>
+          <button class="btn btn-booking btn-lg flex-grow-1" [disabled]="!canProceedStep2() || isSubmitting()"
+            (click)="nextStep()">
+            <span *ngIf="!isSubmitting()">Confirm Booking</span>
+            <span *ngIf="isSubmitting()" class="d-flex align-items-center gap-2">
+              <span class="spinner-border spinner-border-sm"></span>
+              Submitting...
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- STEP 3: OTP Verification -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div class="step-content" *ngIf="currentStep() === 3">
+        <div class="otp-card">
+          <!-- Animated Icon -->
+          <div class="otp-icon-wrapper">
+            <div class="otp-icon-bg"></div>
+            <div class="otp-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <!-- Pulse rings -->
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring delay"></div>
+          </div>
+
+          <!-- Content -->
+          <div class="otp-content">
+            <h3 class="otp-title">Verify Your Booking</h3>
+            <p class="otp-subtitle">
+              We've sent a 6-digit code to your WhatsApp
+            </p>
+
+            <!-- OTP Input Boxes -->
+            <div class="otp-boxes">
+              <input *ngFor="let i of [0,1,2,3]" type="text" class="otp-box" maxlength="1" [attr.data-index]="i"
+                (input)="onOtpInput($event, i)" (keydown)="onOtpKeydown($event, i)" (paste)="onOtpPaste($event)"
+                [class.filled]="getOtpDigit(i)" inputmode="numeric" pattern="[0-9]*">
+            </div>
+
+            <!-- Timer / Resend -->
+            <div class="otp-timer" *ngIf="resendTimer() > 0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              Resend code in <strong>{{ resendTimer() }}s</strong>
+            </div>
+
+            <button class="resend-link" *ngIf="resendTimer() === 0" (click)="resendOtp()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              Resend Code
+            </button>
+          </div>
+
+          <!-- Verify Button -->
+          <button class="btn btn-booking w-100" [disabled]="!canVerifyOtp() || isVerifying()" (click)="verifyOtp()">
+            <ng-container *ngIf="!isVerifying()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              Verify & Complete
+            </ng-container>
+            <ng-container *ngIf="isVerifying()">
+              <span class="spinner-border spinner-border-sm"></span>
+              Verifying...
+            </ng-container>
+          </button>
+
+          <!-- Security Note -->
+          <div class="security-note">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Your booking is secure and encrypted
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>

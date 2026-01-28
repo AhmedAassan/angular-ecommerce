@@ -1,0 +1,705 @@
+<!-- src/app/pages/booking-product-category/booking-product-category.html -->
+<div class="bpc-page">
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- LOADING SCREEN -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="bpc-loading-screen" *ngIf="isLoading()">
+    <div class="bpc-loader"></div>
+    <p>Loading services...</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- PRODUCTS VIEW (OLD FLOW) -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="!isLoading() && currentView() === 'products'">
+    <div class="bpc-products-page">
+      <div class="container">
+
+        <!-- Back Button & Header -->
+        <div class="bpc-products-header">
+          <button class="bpc-back-btn" (click)="goBackToCategories()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back</span>
+          </button>
+
+          <div class="bpc-header-info">
+            <h1>{{ category()?.englishName }}</h1>
+            <p *ngIf="branch()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              {{ branch()!.englishName }}
+            </p>
+          </div>
+
+          <span class="bpc-product-count" *ngIf="services().length > 0">
+            {{ services().length }} service(s)
+          </span>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="bpc-products-grid" *ngIf="services().length > 0">
+          <div *ngFor="let service of services(); trackBy: trackByServiceId" class="bpc-product-card"
+            (click)="selectService(service)">
+
+            <!-- Image Container -->
+            <div class="bpc-product-img">
+              <img [src]="getServiceImage(service)" [alt]="service.englishName" loading="lazy"
+                onerror="this.src='assets/images/placeholder.jpg'">
+
+              <!-- Overlay -->
+              <div class="bpc-img-overlay"></div>
+
+              <!-- Price Tag -->
+              <div class="bpc-price-tag">
+                {{ service.price | number:'1.3-3' }} {{ currency() }}
+              </div>
+
+              <!-- Add to Cart (itemType=1) -->
+              <button *ngIf="service.itemType === 1" class="add-cart-btn" (click)="addToCart(service, $event)"
+                [disabled]="service.isAddingToCart" [class.loading]="service.isAddingToCart">
+                <ng-container *ngIf="!service.isAddingToCart">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                  <span>Add to cart</span>
+                </ng-container>
+
+                <ng-container *ngIf="service.isAddingToCart">
+                  <span class="loading-spinner"></span>
+                  <span>Adding...</span>
+                </ng-container>
+              </button>
+
+              <!-- Book Button (itemType=2) -->
+              <div class="bpc-book-btn" *ngIf="service.itemType === 2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <span>Book Now</span>
+              </div>
+            </div>
+
+            <!-- Info -->
+            <div class="bpc-product-info">
+              <h3 class="bpc-product-name">{{ service.englishName }}</h3>
+              <p class="bpc-product-name-ar">{{ service.arabicName }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="bpc-empty-state" *ngIf="services().length === 0">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M16 16s-1.5-2-4-2-4 2-4 2M9 9h.01M15 9h.01" />
+          </svg>
+          <p>No services available in this category</p>
+          <button class="bpc-btn-secondary" (click)="goBackToCategories()">
+            Browse other categories
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- BOOKING VIEW (OLD + MAKEUP) -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="!isLoading() && currentView() === 'booking'">
+    <div class="bpc-booking-page">
+      <div class="container">
+
+        <!-- Back Button -->
+        <button class="bpc-back-btn" (click)="goBackToProducts()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          <span>Back to Services</span>
+        </button>
+
+        <!-- OTP Step -->
+        <ng-container *ngIf="showOtpStep()">
+          <div class="bpc-otp-section">
+            <div class="bpc-otp-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+            </div>
+            <h2>Verify Your Booking</h2>
+            <p class="bpc-otp-desc">Enter the OTP code sent to your WhatsApp</p>
+
+            <input type="text" class="bpc-otp-input" placeholder="• • • •" maxlength="6" inputmode="numeric"
+              [ngModel]="form().otp" (ngModelChange)="updateForm({ otp: $event })">
+
+            <button class="bpc-btn-primary" [disabled]="!canVerifyOtp() || isVerifying()" (click)="verifyOtp()">
+              <span *ngIf="!isVerifying()">Verify & Complete</span>
+              <span *ngIf="isVerifying()" class="bpc-btn-loading">
+                <span class="bpc-spinner-sm"></span> Verifying...
+              </span>
+            </button>
+
+            <button class="bpc-link-btn" (click)="resendOtp()">
+              Didn't receive it? <strong>Resend</strong>
+            </button>
+          </div>
+        </ng-container>
+
+        <!-- Booking Form -->
+        <ng-container *ngIf="!showOtpStep()">
+
+          <!-- ========================= -->
+          <!-- SUMMARY (OLD FLOW) -->
+          <!-- ========================= -->
+          <div class="bpc-service-summary" *ngIf="selectedService() && !(makeupMode() && isMakeupCategory())">
+            <div class="bpc-summary-img">
+              <img [src]="getServiceImage(selectedService()!)" [alt]="selectedService()!.englishName">
+            </div>
+            <div class="bpc-summary-info">
+              <h3>{{ selectedService()!.englishName }}</h3>
+              <p>{{ selectedService()!.arabicName }}</p>
+              <span class="bpc-summary-price">
+                {{ selectedService()!.price | number:'1.3-3' }} {{ currency() }}
+              </span>
+            </div>
+          </div>
+
+          <!-- ========================= -->
+          <!-- SUMMARY (MAKEUP FLOW) -->
+          <!-- ========================= -->
+          <div class="bpc-service-summary" *ngIf="makeupMode() && isMakeupCategory() && effectiveStaff() as st">
+            <div class="bpc-summary-img">
+              <img [src]="getStaffImageUrl(st)" [alt]="st.englishName"
+                onerror="this.src='assets/images/staff-placeholder.jpg'">
+            </div>
+            <div class="bpc-summary-info">
+              <h3>{{ st.englishName }}</h3>
+              <p>{{ st.arabicName }}</p>
+              <span class="bpc-summary-price">Selected Staff</span>
+            </div>
+          </div>
+
+          <!-- Booking Details Card -->
+          <div class="bpc-booking-meta">
+            <div class="bpc-meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              <span>{{ branch()?.englishName }}</span>
+            </div>
+            <div class="bpc-meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+              <span>{{ category()?.englishName }}</span>
+            </div>
+          </div>
+
+          <!-- Date Selection -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              Select Date
+            </h3>
+            <input type="date" class="bpc-date-input" [ngModel]="form().date"
+              (ngModelChange)="updateForm({ date: $event }); onDateChange()" [min]="getToday()">
+          </div>
+          
+          <!-- Staff Selection (OLD FLOW ONLY) -->
+          <div class="form-section" *ngIf="!(makeupMode() && isMakeupCategory())">
+            <h3 class="section-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              Select Staff
+            </h3>
+
+            <!-- No Date Selected -->
+            <div *ngIf="!form().date" class="bpc-hint-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+              <span>Please select a date first</span>
+            </div>
+
+            <!-- Loading Staff -->
+            <div *ngIf="form().date && isLoadingStaff()" class="staff-loading">
+              <div class="bpc-spinner-sm"></div>
+              <span>Loading available staff...</span>
+            </div>
+
+            <!-- Staff Dropdown -->
+            <div *ngIf="form().date && !isLoadingStaff() && staffList().length > 0" class="staff-dropdown-wrapper">
+
+              <!-- Trigger -->
+              <div class="staff-dropdown-trigger" [class.open]="staffDropdownOpen()"
+                [class.has-selection]="selectedStaff()" (click)="toggleStaffDropdown()">
+
+                <div class="trigger-content">
+                  <ng-container *ngIf="!selectedStaff()">
+                    <div class="placeholder-avatar">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                    </div>
+                    <span class="placeholder-text">Choose a staff member</span>
+                  </ng-container>
+
+                  <ng-container *ngIf="selectedStaff()">
+                    <img class="selected-avatar" [src]="getStaffImageUrl(selectedStaff()!)"
+                      [alt]="selectedStaff()!.englishName" onerror="this.src='assets/images/staff-placeholder.jpg'">
+                    <div class="selected-info">
+                      <span class="selected-name">{{ selectedStaff()!.englishName }}</span>
+                      <span class="selected-name-ar">{{ selectedStaff()!.arabicName }}</span>
+                    </div>
+                    <span class="availability-tag available">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                      Available
+                    </span>
+                  </ng-container>
+                </div>
+
+                <svg class="dropdown-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+
+              <!-- Dropdown Menu -->
+              <div class="staff-dropdown-menu" [class.open]="staffDropdownOpen()">
+                <div class="dropdown-scroll">
+                  <div *ngFor="let staff of staffList(); trackBy: trackByStaffId" class="staff-option"
+                    [class.selected]="form().staffId === staff.id" [class.unavailable]="!staff.isAvailable"
+                    (click)="selectStaff(staff)">
+
+                    <img class="staff-avatar" [src]="getStaffImageUrl(staff)" [alt]="staff.englishName"
+                      onerror="this.src='assets/images/staff-placeholder.jpg'">
+
+                    <div class="staff-details">
+                      <span class="staff-name">{{ staff.englishName }}</span>
+                      <span class="staff-name-ar">{{ staff.arabicName }}</span>
+                    </div>
+
+                    <span class="availability-tag" [class.available]="staff.isAvailable">
+                      <svg *ngIf="staff.isAvailable" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                      <svg *ngIf="!staff.isAvailable" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="3">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                      {{ staff.isAvailable ? 'Available' : 'Busy' }}
+                    </span>
+
+                    <div class="selected-check" *ngIf="form().staffId === staff.id">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- No Staff Available -->
+            <div *ngIf="form().date && !isLoadingStaff() && staffList().length === 0" class="empty-state">
+              <div class="empty-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <p class="empty-title">No staff available</p>
+              <p class="empty-desc">Try selecting a different date</p>
+            </div>
+          </div>
+          <!-- Time Selection (OLD FLOW ONLY) -->
+          <div class="form-section" *ngIf="!(makeupMode() && isMakeupCategory())">
+            <h3 class="section-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              Select Time
+            </h3>
+
+
+            <!-- Hint -->
+            <div class="bpc-hint-box" *ngIf="!form().date || !form().staffId">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+              <span>Please select date and staff first</span>
+            </div>
+
+
+            <input *ngIf="form().date && form().staffId" type="time" class="bpc-date-input" [ngModel]="form().time"
+              (ngModelChange)="updateForm({ time: $event })" />
+          </div>
+          <!-- ========================= -->
+          <!-- MAKEUP: ITEMS MULTI SELECT -->
+          <!-- ========================= -->
+          <!-- ========================= -->
+          <!-- MAKEUP: ITEMS MULTI SELECT (DROPDOWN) -->
+          <!-- ========================= -->
+          <div class="form-section" *ngIf="makeupMode() && isMakeupCategory()">
+            <h3 class="section-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                </path>
+                <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                <line x1="12" y1="22" x2="12" y2="12"></line>
+              </svg>
+              Select Item(s)
+            </h3>
+
+            <!-- Loading items -->
+            <div class="staff-loading" *ngIf="isLoadingItems()">
+              <div class="bpc-spinner-sm"></div>
+              <span>Loading items...</span>
+            </div>
+
+            <!-- Dropdown -->
+            <div *ngIf="!isLoadingItems() && itemsByStaff().length > 0" class="items-dropdown-wrapper">
+
+              <!-- Trigger -->
+              <div class="items-dropdown-trigger" [class.open]="itemsDropdownOpen()"
+                [class.has-selection]="selectedItemIds().length > 0" (click)="toggleItemsDropdown()">
+
+                <div class="trigger-content">
+                  <ng-container *ngIf="selectedItemIds().length === 0">
+                    <div class="placeholder-avatar">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path
+                          d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                        </path>
+                      </svg>
+                    </div>
+                    <span class="placeholder-text">Choose item(s)</span>
+                  </ng-container>
+
+                  <ng-container *ngIf="selectedItemIds().length > 0">
+                    <div class="selected-info">
+                      <span class="selected-name">
+                        {{ selectedItemsPreview() }}
+                      </span>
+                    </div>
+
+                    <span class="selected-count">
+                      {{ selectedItemIds().length }} selected
+                    </span>
+
+                    <button type="button" class="clear-btn" (click)="clearSelectedItems($event)">
+                      Clear
+                    </button>
+                  </ng-container>
+                </div>
+
+                <svg class="dropdown-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+
+              <!-- Dropdown Menu -->
+              <div class="items-dropdown-menu" [class.open]="itemsDropdownOpen()">
+                <div class="dropdown-scroll">
+                  <div *ngFor="let it of itemsByStaff(); trackBy: trackByItemId" class="item-option"
+                    [class.selected]="selectedItemIds().includes(it.id)"
+                    (click)="toggleItemFromDropdown(it.id, $event)">
+
+                    <!-- Checkbox -->
+                    <input type="checkbox" class="opt-check" [checked]="selectedItemIds().includes(it.id)"
+                      (click)="$event.stopPropagation()" (change)="toggleItemSelection(it.id)" />
+
+                    <!-- Optional thumb (in menu only) -->
+                    <img class="item-thumb" [src]="getServiceImage(it)" [alt]="it.englishName"
+                      onerror="this.src='assets/images/placeholder.jpg'">
+
+                    <div class="item-details">
+                      <span class="item-name">{{ it.englishName }}</span>
+                      <span class="item-name-ar">{{ it.arabicName }}</span>
+                    </div>
+
+                    <span class="item-price">
+                      {{ it.price | number:'1.3-3' }} {{ currency() }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Empty items -->
+            <div class="empty-state" *ngIf="!isLoadingItems() && itemsByStaff().length === 0">
+              <p class="empty-title">No items found for this staff</p>
+              <p class="empty-desc">Please try another staff</p>
+            </div>
+          </div>
+
+          <!-- ========================= -->
+          <!-- MAKEUP: TIMESLOTS -->
+          <!-- ========================= -->
+          <div class="form-section" *ngIf="makeupMode() && isMakeupCategory()">
+            <h3 class="section-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              Arrival Time
+            </h3>
+
+            <!-- hints -->
+            <div class="bpc-hint-box" *ngIf="!form().date">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+              <span>Please select a date first</span>
+            </div>
+
+            <div class="bpc-hint-box" *ngIf="form().date && selectedItemIds().length === 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+              <span>Please select at least one item first</span>
+            </div>
+
+            <!-- “picker field” -->
+            <button type="button" class="ts-field" [disabled]="!form().date || selectedItemIds().length === 0"
+              (click)="openTimeSlotModal()">
+              <span class="ts-label">Select start time of service</span>
+              <span class="ts-value" *ngIf="selectedTimeSlot(); else tsPlaceholder">
+                {{ formatSlotLabel(selectedTimeSlot()) }}
+              </span>
+              <ng-template #tsPlaceholder>
+                <span class="ts-placeholder">Tap to choose</span>
+              </ng-template>
+
+              <svg class="ts-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- ========================= -->
+          <!-- TIME SLOT MODAL (like screenshot) -->
+          <!-- ========================= -->
+          <div class="ts-overlay" *ngIf="showTimeSlotModal()" (click)="closeTimeSlotModal()"></div>
+
+          <div class="ts-modal" *ngIf="showTimeSlotModal()">
+            <div class="ts-modal-header">
+              <button class="ts-close" (click)="closeTimeSlotModal()">✕</button>
+              <div class="ts-title">
+                <h3>Arrival Time</h3>
+                <p class="ts-note">Select start time of service</p>
+              </div>
+            </div>
+
+            <!-- Days strip -->
+            <!-- <div class="ts-days">
+              <button type="button" class="ts-day" *ngFor="let d of weekDays()" [class.active]="form().date === d.iso"
+                (click)="selectDay(d.iso)">
+                <span class="dn">{{ d.dayName }}</span>
+                <span class="dd">{{ d.dayNum }}</span>
+              </button>
+            </div> -->
+
+            <!-- Loading -->
+            <div class="ts-loading" *ngIf="isLoadingSlots()">
+              <div class="bpc-spinner-sm"></div>
+              <span>Loading available time slots...</span>
+            </div>
+
+            <!-- Times grid -->
+            <div class="ts-grid" *ngIf="!isLoadingSlots() && timeSlots().length > 0">
+              <button type="button" class="ts-time" *ngFor="let slot of timeSlots()"
+                [class.selected]="selectedTimeSlot() === slot" (click)="selectTimeSlot(slot)">
+                {{ formatSlotLabel(slot) }}
+              </button>
+            </div>
+
+            <!-- Empty -->
+            <div class="ts-empty" *ngIf="!isLoadingSlots() && timeSlots().length === 0">
+              No time slots available for this day
+            </div>
+
+            <!-- Footer confirm -->
+            <div class="ts-footer">
+              <button class="ts-confirm" [disabled]="!selectedTimeSlot()" (click)="confirmSlot()">
+                Confirm Slot
+              </button>
+            </div>
+          </div>
+
+          <!-- Service Type -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+              Service Type
+            </h3>
+            <div class="bpc-toggle-btns">
+              <button [class.active]="form().serviceType === 0" (click)="setServiceType(0)">
+                🏠 At Salon
+              </button>
+              <button [class.active]="form().serviceType === 1" (click)="setServiceType(1)">
+                🚗 Home Service
+              </button>
+            </div>
+          </div>
+
+          <!-- Number of Persons -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              Number of Persons
+            </h3>
+            <div class="bpc-counter">
+              <button [disabled]="form().persons <= 1" (click)="adjustPersons(-1)">−</button>
+              <span>{{ form().persons }}</span>
+              <button (click)="adjustPersons(1)">+</button>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              Notes <span class="optional">(optional)</span>
+            </h3>
+            <textarea class="bpc-textarea" rows="3" placeholder="Any special requests..." [ngModel]="form().notes"
+              (ngModelChange)="updateForm({ notes: $event })"></textarea>
+          </div>
+
+          <!-- Deposit Notice -->
+          <div class="payment-note" *ngIf="category() as cat" [class.is-full]="cat.deposit === 0"
+            [class.is-deposit]="cat.deposit !== 0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v5" />
+              <path d="M12 16h.01" />
+            </svg>
+
+            <ng-container *ngIf="cat.deposit === 0; else depositTpl">
+              <span>✅ The full amount will be paid upon booking confirmation</span>
+            </ng-container>
+
+            <ng-template #depositTpl>
+              <span>
+                💳 Deposit required:
+                <b>{{ cat.deposit }} {{ currency() }}</b>
+              </span>
+            </ng-template>
+          </div>
+
+          <!-- Submit Button -->
+          <button class="bpc-btn-primary bpc-btn-submit" [disabled]="!canSubmitBooking() || isSubmitting()"
+            (click)="submitBooking()">
+            <span *ngIf="!isSubmitting()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              Confirm Booking
+            </span>
+            <span *ngIf="isSubmitting()" class="bpc-btn-loading">
+              <span class="bpc-spinner-sm"></span> Submitting...
+            </span>
+          </button>
+
+        </ng-container>
+
+      </div>
+    </div>
+  </ng-container>
+  <!-- ═════════════════════════════════════════════════════════════ -->
+  <!-- PAYMENT TERMS SHEET -->
+  <!-- ═════════════════════════════════════════════════════════════ -->
+  <div class="terms-overlay" [class.active]="showPaymentTermsSheet()" (click)="closePaymentTermsSheet()"></div>
+
+  <div class="terms-sheet" [class.active]="showPaymentTermsSheet()" (click)="$event.stopPropagation()">
+    <div class="terms-handle"></div>
+
+    <div class="terms-header">
+      <div class="left">
+        <h3>Payment Terms</h3>
+        <p>Please read & accept before confirming your booking</p>
+      </div>
+
+      <button class="terms-close" (click)="closePaymentTermsSheet()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="terms-body">
+      <div class="terms-box">
+        <pre class="terms-text">{{ paymentTermsText() }}</pre>
+      </div>
+
+      <label class="terms-accept">
+        <input type="checkbox" [ngModel]="paymentTermsAccepted()" (ngModelChange)="paymentTermsAccepted.set($event)"
+          (click)="$event.stopPropagation()" />
+        <span>I have read and agree to the payment terms</span>
+      </label>
+    </div>
+
+    <div class="terms-footer">
+      <button class="btn-cancel" (click)="closePaymentTermsSheet()">Cancel</button>
+
+      <button class="btn-confirm" [disabled]="!paymentTermsAccepted()" (click)="agreePaymentTermsAndContinue()">
+        Agree & Confirm Booking
+      </button>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,105 @@
+<!-- <div class="container tag-rail pt-5 mt-4">
+    <div #btnLeftCon class="btn-left-con">
+        <i class="fa fa-angle-left btn-left" aria-hidden="true"></i>
+    </div>
+
+    <div class="rail-container" #railCon>
+        <div class="rail" #rail>
+            <span>
+                <a id="tag1" class="tag tag-selected" routerLink="/">All</a>
+            </span>
+            <span>
+                
+                <a *ngFor="let category of categories"
+                    [routerLink]="['/']"
+                    [queryParams]="{ category: category.slug }"
+                    class="tag"
+                    id="tag{{ category.name }}">
+                    {{ category.name }}
+                    </a>
+            </span>
+            
+            
+        </div>
+    </div>
+
+    <div #btnRightCon class="btn-right-con">
+        <i class="fa fa-angle-right btn-right" aria-hidden="true"></i>
+    </div>
+</div> -->
+
+<!-- category-rail.html -->
+<nav class="category-rail" [class.loading]="isLoading()" role="navigation" aria-label="Category navigation">
+
+  <!-- Loading skeleton -->
+  <div *ngIf="isLoading()" class="loading-skeleton">
+    <div class="skeleton-item" *ngFor="let item of [1,2,3,4,5,6]"></div>
+  </div>
+
+  <!-- Category rail content -->
+  <div *ngIf="!isLoading()" class="rail-wrapper">
+
+    <!-- Left scroll button -->
+    <button #leftBtn class="scroll-button scroll-button--left" 
+            [class.visible]="canScrollLeft()"
+            [disabled]="!canScrollLeft()" 
+            (click)="scrollLeft()" 
+            type="button" 
+            aria-label="Scroll categories left">
+      <svg class="scroll-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15,18 9,12 15,6"></polyline>
+      </svg>
+    </button>
+
+    <!-- Categories container -->
+    <div #railContainer class="rail-container" (scroll)="onScroll()" role="tablist" aria-label="Product categories">
+      <div class="categories-track">
+
+        <!-- "All" category - NO queryParams means clear the filter -->
+        <a class="category-tag" 
+           [class.active]="isAllCategoriesSelected()"
+           [attr.aria-selected]="isAllCategoriesSelected()" 
+           [routerLink]="['/']"
+           [queryParams]="{}"
+           queryParamsHandling=""
+           role="tab" 
+           tabindex="0">
+          <span class="category-label">All</span>
+        </a>
+
+        <!-- Dynamic categories - Only routerLink, no click handler for navigation -->
+        <a *ngFor="let category of categories(); trackBy: trackByCategory" 
+           class="category-tag"
+           [class.active]="isCategorySelected(category.id)" 
+           [attr.aria-selected]="isCategorySelected(category.id)"
+           [routerLink]="['/']" 
+           [queryParams]="{ categoryId: category.id }"
+           [title]="category.name" 
+           role="tab" 
+           tabindex="0">
+          <span class="category-label">{{ category.name }}</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Right scroll button -->
+    <button #rightBtn class="scroll-button scroll-button--right" 
+            [class.visible]="canScrollRight()"
+            [disabled]="!canScrollRight()" 
+            (click)="scrollRight()" 
+            type="button" 
+            aria-label="Scroll categories right">
+      <svg class="scroll-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9,18 15,12 9,6"></polyline>
+      </svg>
+    </button>
+
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!isLoading() && !hasCategories()" class="empty-state" role="status" aria-live="polite">
+    <p class="empty-message">No categories available</p>
+  </div>
+
+</nav>

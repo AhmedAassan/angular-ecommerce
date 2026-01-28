@@ -1,0 +1,222 @@
+<!-- <div class="container mt-4">
+  <div class="row">
+    <div *ngFor="let product of products" class="col-md-4 mb-4">
+      <div class="card">
+        <img [src]="product.images[0]" class="card-img-top" alt="{{ product.title }}" />
+        <div class="card-body">
+          <h5 class="card-title">{{ product.title }}</h5>
+          <p class="card-text">{{ product.price | currency }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+
+<div class="container mt-4 pb-5">
+
+  <!-- ////// filter and sort ////// -->
+  <!-- ──────── DESKTOP INLINE FILTER & SORT CARDS ──────── -->
+  <div class="filter-sort-bar d-none d-lg-flex gap-3 mb-4">
+
+    <!-- FILTER CARD -->
+    <div class="card filter-card flex-shrink-0">
+      <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center"
+        (click)="toggleSection('filter')">
+        <span class="fw-semibold"><i class="bi bi-sliders me-1"></i> Filtration</span>
+        <i class="bi" [ngClass]="['bi', showFilter ? 'bi-chevron-up' : 'bi-chevron-down']"></i>
+      </div>
+      <div class="animated-collapse-wrapper" #filterContent [ngStyle]="getSectionStyle(showFilter, filterContent)">
+        <div class="card-body p-3">
+          <!-- PRICE FILTER -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between">
+              <small class="text-muted fw-semibold">Price</small>
+              <button class="btn-reset" type="button" (click)="minPrice = maxPrice = undefined">Reset</button>
+            </div>
+            <div class="d-flex gap-2">
+              <input type="number" class="form-control" placeholder="From" [(ngModel)]="minPrice"
+                [ngModelOptions]="{standalone:true}">
+              <input type="number" class="form-control" placeholder="To" [(ngModel)]="maxPrice"
+                [ngModelOptions]="{standalone:true}">
+            </div>
+          </div>
+
+          <!-- ACTION BUTTONS -->
+          <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-outline-secondary flex-fill" (click)="resetAll()">Reset All</button>
+            <button class="btn btn-apply flex-fill position-relative" (click)="applyFilters()">
+              Apply Filters
+              <span *ngIf="activeCount()"
+                class="badge bg-light text-primary position-absolute top-0 start-100 translate-middle">
+                {{ activeCount() }}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SORT CARD -->
+    <div class="card sort-card flex-shrink-0">
+      <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center"
+        (click)="toggleSection('sort')">
+        <span class="fw-semibold"><i class="bi bi-arrow-down-up me-1"></i> Sorting</span>
+        <i class="bi" [ngClass]="['bi', showSort ? 'bi-chevron-up' : 'bi-chevron-down']"></i>
+      </div>
+      <div class="animated-collapse-wrapper" #sortContent [ngStyle]="getSectionStyle(showSort, sortContent)">
+        <div class="card-body p-3">
+          <ul class="list-unstyled m-0">
+            <li *ngFor="let opt of sortOptions">
+              <label class="sort-radio d-flex align-items-center">
+                <input type="radio" name="sort" [value]="opt.key" [(ngModel)]="sortKey" (change)="applySort()">
+                <span>{{ opt.label }}</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ──────── MOBILE DRAWERS ──────── -->
+
+  <!-- FILTER DRAWER -->
+  <aside class="filter-drawer shadow d-lg-none" [class.open]="showFilter">
+    <span class="drawer-handle d-lg-none"></span>
+    <h6 class="mb-3">Filter by:</h6>
+
+    <!-- PRICE -->
+    <div class="mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6>Price</h6>
+        <button class="btn btn-outline-secondary btn-reset" type="button"
+          (click)="minPrice = maxPrice = undefined">Reset</button>
+      </div>
+      <div class="d-flex gap-2">
+        <input type="number" class="form-control" placeholder="From" [(ngModel)]="minPrice"
+          [ngModelOptions]="{standalone:true}">
+        <input type="number" class="form-control" placeholder="To" [(ngModel)]="maxPrice"
+          [ngModelOptions]="{standalone:true}">
+      </div>
+    </div>
+
+    <hr>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary flex-fill" (click)="resetAll()">Reset All</button>
+      <button class="btn btn-apply flex-fill position-relative" (click)="applyFilters()">
+        Apply Filters
+        <span *ngIf="activeCount()"
+          class="badge bg-light text-primary position-absolute top-0 start-100 translate-middle">
+          {{ activeCount() }}
+        </span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- SORT DRAWER (MOBILE ONLY) -->
+  <aside class="sort-drawer shadow d-lg-none" [class.open]="showSort">
+    <span class="drawer-handle d-lg-none"></span>
+    <h6 class="mb-3">Sort by:</h6>
+
+    <ul class="list-unstyled m-0">
+      <li *ngFor="let opt of sortOptions">
+        <label class="sort-radio d-flex align-items-center">
+          <input type="radio" name="sortMobile" [value]="opt.key" [(ngModel)]="sortKey" (change)="applySort()">
+          <span>{{ opt.label }}</span>
+        </label>
+      </li>
+    </ul>
+
+    <div class="mt-4">
+      <button class="btn btn-outline-secondary w-100" (click)="showSort = false">Close</button>
+    </div>
+  </aside>
+
+  <!-- MOBILE TOGGLE BUTTONS -->
+  <button class="btn btn-outline-dark d-lg-none position-fixed filter-toggle" (click)="showFilter = true">
+    <i class="bi bi-sliders"></i>
+  </button>
+  <button class="btn btn-outline-dark d-lg-none position-fixed sort-toggle" (click)="showSort = true">
+    <i class="bi bi-arrow-down-up"></i>
+  </button>
+
+  <!-- BACKDROP FOR DRAWERS -->
+  <div class="filter-backdrop d-lg-none" *ngIf="showFilter || showSort" (click)="showFilter = showSort = false"></div>
+
+  <!-- //// END filter and sort design///// -->
+
+  <ng-container *ngIf="products$ | async as products; else loading">
+    <div class="row">
+      <div *ngIf="products.length === 0" class="col-12 text-center alert alert-danger">
+        No products found.
+      </div>
+
+      <div *ngFor="let product of products" class="col-6 col-sm-4 col-md-3 col-xl-2 mb-4">
+        <div class="product-card h-100 position-relative" [routerLink]="['/product', (product.itemId ?? product.id)]">
+          <div class="img-wrap position-relative">
+            <img [src]="product.fullImageUrl" [alt]="product.englishName || product.arabicName || 'Product image'"
+              class="product-img w-100" loading="lazy" onerror="this.src='assets/images/placeholder.jpg'" />
+
+            <!-- Wishlist -->
+            <button class="wishlist-btn" [class.active]="product.isWished" (click)="toggleWishlist(product, $event)"
+              [attr.aria-label]="product.isWished ? 'Remove from wishlist' : 'Add to wishlist'">
+              <i class="bi" [ngClass]="product.isWished ? 'bi-heart-fill' : 'bi-heart'"></i>
+            </button>
+
+            <!-- Add-to-cart -->
+            <button *ngIf="product.itemType !== 2"
+              class="add-cart-btn" (click)="addToCart(product, $event)" [disabled]="product.isAddingToCart"
+              [attr.aria-label]="'Add ' + (product.englishName || product.arabicName) + ' to cart'">
+              <span *ngIf="!product.isAddingToCart">Add to cart</span>
+              <span *ngIf="product.isAddingToCart" class="loading-spinner"></span>
+            </button>
+            <button *ngIf="product.itemType === 2" 
+                    class="book-now-btn" 
+                    (click)="bookNow(product, $event)" 
+                    [disabled]="product.isBooking">
+              <span *ngIf="!product.isBooking">Booking Now</span>
+              <span *ngIf="product.isBooking" class="loading-spinner"></span>
+            </button>
+          </div>
+
+          <!-- Details -->
+          <div class="card-content">
+            <h6 class="product-title">{{ product.englishName || product.arabicName }}</h6>
+            <p class="product-desc">
+              {{ (product.unitEnglishName || '') | slice:0:45 }}
+              <span *ngIf="(product.unitEnglishName?.length || 0) > 45">&hellip;</span>
+            </p>
+
+            <div class="card-footer">
+              <div class="price-section">
+                <span class="current-price">{{ product.price }} KWD</span>
+                <span class="original-price" *ngIf="product.originalPrice">
+                  {{ product.originalPrice }} KWD
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-3">Loading products...</p>
+    </div>
+  </ng-template>
+
+</div>
+
+
+<ng-template #loading>
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-3">Loading products...</p>
+  </div>
+</ng-template>

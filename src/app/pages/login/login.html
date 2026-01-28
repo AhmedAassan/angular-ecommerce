@@ -1,0 +1,235 @@
+<!-- src/app/pages/login/login.html -->
+<div class="auth-wrapper container my-5">
+  <!-- Header Section -->
+  <div class="auth-header text-center mb-4">
+    <h2 class="register-header mb-3">Welcome Back</h2>
+    <p class="helper mb-4">
+      Please enter your credentials to access your account.
+    </p>
+  </div>
+
+  <!-- Guest Cart Notice -->
+  <div *ngIf="hasGuestCart()" class="guest-cart-notice mx-auto mb-4">
+    <div class="notice-content">
+      <div class="notice-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+      </div>
+      <div class="notice-text">
+        <strong>{{ guestCartCount() }} item{{ guestCartCount() > 1 ? 's' : '' }} in your cart</strong>
+        <p class="mb-0">Your shopping cart will be synced to your account after login.</p>
+      </div>
+      <div class="notice-badge">
+        <span class="badge">{{ guestCartCount() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Return URL Notice -->
+  <div *ngIf="returnUrl && returnUrl !== '/'" class="redirect-notice mx-auto mb-4">
+    <div class="notice-content">
+      <div class="notice-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 16 16 12 12 8"></polyline>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+      </div>
+      <div class="notice-text">
+        <span>You'll be redirected to <strong>{{ getRedirectLabel() }}</strong> after login.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Form -->
+  <form class="auth-card card shadow-sm p-4 mx-auto" [formGroup]="form" (ngSubmit)="submit()"
+    (keydown)="onEnterKey($event)" novalidate>
+
+    <!-- Mobile Field -->
+    <div class="form-group mb-3">
+      <label class="form-label">
+        <span class="label-text">Mobile</span>
+        <span class="required-asterisk">*</span>
+      </label>
+
+
+      <div class="input-wrapper">
+        <div class="input-icon">
+          <!-- you can keep the same icon or replace with phone icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.81.3 1.6.54 2.36a2 2 0 0 1-.45 2.11L9.09 10.91a16 16 0 0 0 4 4l1.72-1.11a2 2 0 0 1 2.11-.45c.76.24 1.55.42 2.36.54A2 2 0 0 1 22 16.92z" />
+          </svg>
+        </div>
+
+
+        <input type="tel" class="form-control" formControlName="mobile" placeholder="Enter your mobile number"
+          [class.is-invalid]="isFieldInvalid('mobile')" autocomplete="tel" />
+      </div>
+
+
+      <div class="invalid-feedback" *ngIf="isFieldInvalid('mobile')">
+        {{ getFieldError('mobile') }}
+      </div>
+    </div>
+
+    <!-- Password Field -->
+    <div class="form-group mb-3">
+      <label class="form-label">
+        <span class="label-text">Password</span>
+        <span class="required-asterisk">*</span>
+      </label>
+      <div class="input-wrapper">
+        <div class="input-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="m7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+        </div>
+        <input [type]="getPasswordInputType()" class="form-control" formControlName="password"
+          placeholder="Enter your password" [class.is-invalid]="isFieldInvalid('password')"
+          autocomplete="current-password" />
+        <button type="button" class="password-toggle" (click)="togglePasswordVisibility()"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <ng-container *ngIf="!showPassword()">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </ng-container>
+            <ng-container *ngIf="showPassword()">
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+              <line x1="1" y1="1" x2="23" y2="23" />
+            </ng-container>
+          </svg>
+        </button>
+      </div>
+      <div class="invalid-feedback" *ngIf="isFieldInvalid('password')">
+        {{ getFieldError('password') }}
+      </div>
+    </div>
+
+    <!-- Remember Me & Forgot Password -->
+    <div class="form-group mb-4 d-flex justify-content-between align-items-center">
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="rememberMe" formControlName="rememberMe" />
+        <label class="form-check-label" for="rememberMe">Remember me</label>
+      </div>
+      <a routerLink="/forgot-password" class="forgot small">
+        <span class="question-icon">❓</span> Forgot password?
+      </a>
+    </div>
+
+    <!-- Error Message (Inline) -->
+    <div *ngIf="errorMsg()" class="alert alert-danger error-alert mb-3" role="alert">
+      <div class="error-content">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          class="error-icon">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="15" y1="9" x2="9" y2="15" />
+          <line x1="9" y1="9" x2="15" y2="15" />
+        </svg>
+        <div class="error-text">
+          <strong>Login Failed</strong>
+          <p class="mb-0">{{ errorMsg() }}</p>
+        </div>
+        <button type="button" class="error-close" (click)="clearError()" aria-label="Close error">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary w-100 submit-btn" [disabled]="form.invalid || loading()">
+      <ng-container *ngIf="loading(); else notLoading">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <span>{{ hasGuestCart() ? 'Signing In & Syncing Cart...' : 'Signing In...' }}</span>
+      </ng-container>
+      <ng-template #notLoading>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+          <polyline points="10 17 15 12 10 7" />
+          <line x1="15" y1="12" x2="3" y2="12" />
+        </svg>
+        <span>Sign In</span>
+        <span *ngIf="hasGuestCart()" class="cart-sync-hint ms-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4-3-9s1.34-9 3-9" />
+          </svg>
+          + Sync Cart
+        </span>
+      </ng-template>
+    </button>
+
+    <!-- Divider -->
+    <div class="divider my-4">
+      <span>or</span>
+    </div>
+
+    <!-- Social Login Buttons -->
+    <div class="social-login-buttons d-flex gap-2 mb-3">
+      <button type="button" class="btn btn-outline-secondary flex-fill social-btn" (click)="loginWithGoogle()"
+        [disabled]="loading()">
+        <svg width="18" height="18" viewBox="0 0 24 24" class="me-2">
+          <path fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+          <path fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+        </svg>
+        Google
+      </button>
+      <button type="button" class="btn btn-outline-secondary flex-fill social-btn" (click)="loginWithFacebook()"
+        [disabled]="loading()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2" class="me-2">
+          <path
+            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
+        Facebook
+      </button>
+    </div>
+  </form>
+
+  <!-- Sign Up Link -->
+  <div class="auth-footer text-center mt-4 pb-5">
+    <p class="login-prompt pb-4">
+      Don't have an account?
+      <a routerLink="/register" class="login-link">Create Account</a>
+    </p>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div *ngIf="loading()" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <p class="loading-text mt-3 mb-0">
+        {{ hasGuestCart() ? 'Authenticating & preparing cart sync...' : 'Authenticating...' }}
+      </p>
+      <div *ngIf="hasGuestCart()" class="loading-cart-info mt-2">
+        <small class="text-muted">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            class="me-1">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          {{ guestCartCount() }} item{{ guestCartCount() > 1 ? 's' : '' }} ready to sync
+        </small>
+      </div>
+    </div>
+  </div>
+</div>

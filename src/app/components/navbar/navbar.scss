@@ -1,0 +1,116 @@
+// .navbar-nav .dropdown-menu {
+//     background-color: #F8F9FA;
+//     border: none;
+// }
+
+
+/* limit height and enable a scrollbar only when needed */
+.category-scroll {
+  max-height: 80vh;     // ≈ 6–7 items; adjust as you like (px, rem, or 60vh)
+  overflow-y: auto;
+}
+
+/* optional: nicer-looking thin scrollbar (WebKit browsers) */
+.category-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.category-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, .25);
+  border-radius: 3px;
+}
+
+/* ================================ */
+/* SEARCH PANEL                     */
+/* ================================ */
+.search-box {
+  /* match input height with icon button */
+  .history-btn {
+    width: 46px; height: 46px;
+    background:#f46d29; color:#fff;
+    border-radius:.5rem;
+    display:grid; place-items:center;
+  }
+
+  .input-wrapper {
+    position: relative;
+
+    .form-control {
+      height: 46px;
+      border-radius:.5rem;
+      padding-right: 70px;   // space for clear & loupe
+    }
+
+    .loupe {
+      position:absolute;
+      right: 18px;
+      top:50%; transform:translateY(-50%);
+      color:#f46d29;
+      pointer-events:none;
+    }
+
+    .clear-btn {
+      position:absolute;
+      right: 46px;
+      top:50%; transform:translateY(-50%);
+      border:none; background:transparent;
+      color:#f46d29;
+    }
+
+    /* result pop-panel */
+    .result-panel {
+      position:absolute;
+      left:0; right:0;
+      top: calc(100% + .4rem);
+      background:#fff;
+      border-radius:.75rem;
+      max-height: 320px;
+      overflow:auto;
+      z-index:1055;
+      padding:.5rem 0;
+
+      .result-item {
+        padding:.4rem .75rem;
+        cursor:pointer;
+        transition: background .15s;
+        img { border-radius:.4rem; object-fit:cover; }
+        .title { font-size: .875rem; font-weight:600; }
+        .price { color:#f46d29; font-weight:600; font-size:.8rem; }
+        &:hover { background:#f8f9fa; text-decoration:none; }
+      }
+
+      .no-res { font-size:.9rem; }
+    }
+  }
+  
+}
+
+/* Hide browser-native clear icon on <input type="search">  */
+// blue-gray “×” you are seeing is the native “cancel” icon that
+// comes with type="search" inputs in Chrome / Edge / Safari.
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+@media (min-width: 992px) and (max-width: 1023.98px) {
+  .navbar .search-box { display: none !important; }
+}
+
+/*  Between 1024 px and <1200 px show it, but make the input tiny  -- */
+@media (min-width: 1024px) and (max-width: 1199.98px) {
+  .navbar .search-box .input-wrapper {
+    flex: 0 0 100px;      /* do not grow, do shrink, fixed basis 100 */
+    max-width: 150px;
+  }
+}
+// theme-desktop
+.theme-desktop {
+  display: flex;
+
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}

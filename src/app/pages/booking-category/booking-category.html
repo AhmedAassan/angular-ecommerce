@@ -1,0 +1,185 @@
+<!-- src/app/pages/booking-category/booking-category.html -->
+<div class="bc-page">
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- LOADING SCREEN -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="bc-loading-screen" *ngIf="isLoading()">
+    <div class="bc-loader"></div>
+    <p>Loading services...</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- CATEGORIES VIEW -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+  <ng-container *ngIf="!isLoading()">
+    <div class="bc-categories-page">
+      <div class="container">
+
+        <!-- Header -->
+        <div class="bc-page-header">
+          <h1>Our Services</h1>
+          <p>Choose a category to get started</p>
+        </div>
+
+        <!-- Categories Grid -->
+        <div class="bc-categories-grid">
+          <div *ngFor="let category of categories(); trackBy: trackByCategoryId" class="bc-category-card"
+            (click)="onCategoryClick(category)">
+            <!-- Payment Badge -->
+            <div class="bc-payment-badge" [class.is-full]="category.deposit === 0"
+              [class.is-deposit]="category.deposit !== 0">
+              <ng-container *ngIf="category.deposit === 0; else depTpl">
+                Full payment
+              </ng-container>
+
+              <ng-template #depTpl>
+                Deposit {{ category.deposit }} {{ config()?.currency_symbol || 'KWD' }}
+              </ng-template>
+            </div>
+
+            <!-- Image -->
+            <div class="bc-category-image">
+              <img [src]="getCategoryImage(category)" [alt]="category.englishName" loading="lazy"
+                onerror="this.src='assets/images/category-placeholder.svg'">
+
+              <!-- Floating Effect Overlay -->
+              <div class="bc-category-glow"></div>
+            </div>
+
+            <!-- Name -->
+            <div class="bc-category-content">
+              <h3 class="bc-category-title">{{ category.englishName }}</h3>
+              <!-- <p class="bc-category-title-ar">{{ category.arabicName }}</p> -->
+            </div>
+
+            <!-- Arrow Icon -->
+            <div class="bc-category-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="bc-empty-state" *ngIf="categories().length === 0">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M16 16s-1.5-2-4-2-4 2-4 2M9 9h.01M15 9h.01" />
+          </svg>
+          <p>No categories available</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- BRANCH SELECTION PANEL (Slides from Right) -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="branch-panel-overlay" [class.active]="showBranchPanel()">
+    </div>
+
+    <div class="branch-panel" [class.active]="showBranchPanel()">
+      <!-- Panel Header -->
+      <div class="branch-panel-header">
+        <button class="branch-panel-close" (click)="closeBranchPanel()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+        <div class="branch-panel-title">
+          <h2>Select Branch</h2>
+          <p *ngIf="selectedCategory()">{{ selectedCategory()!.englishName }}</p>
+        </div>
+      </div>
+
+      <!-- Branch List -->
+      <div class="branch-panel-content">
+        <div *ngFor="let branch of branches(); trackBy: trackByBranchId" class="branch-item"
+          (click)="selectBranch(branch)">
+
+          <div class="branch-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+
+          <div class="branch-info">
+            <span class="branch-name">{{ branch.englishName }}</span>
+            <span class="branch-name-ar">{{ branch.arabicName }}</span>
+          </div>
+
+          <div class="branch-arrow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- MAKEUP PANEL (Slides from Right) -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="makeup-panel-overlay" [class.active]="showMakeupPanel()"></div>
+
+    <div class="makeup-panel" [class.active]="showMakeupPanel()">
+      <div class="makeup-panel-header">
+        <button class="makeup-panel-close" (click)="closeMakeupPanel()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div class="makeup-panel-title">
+          <h2>Choose Date & Staff</h2>
+          <p *ngIf="selectedCategory()">{{ selectedCategory()!.englishName }}</p>
+        </div>
+      </div>
+
+      <div class="makeup-panel-content">
+
+        <!-- Date -->
+        <div class="makeup-date-box">
+          <label>Select Date</label>
+          <input type="date" [value]="makeupDate()" (change)="onMakeupDateChange($any($event.target).value)"
+            [min]="todayMin()" />
+        </div>
+
+        <!-- Loading -->
+        <div class="makeup-loading" *ngIf="makeupStaffLoading()">
+          <div class="bc-loader"></div>
+          <span>Loading staff...</span>
+        </div>
+
+        <!-- Staff cards -->
+        <div class="makeup-staff-grid" *ngIf="!makeupStaffLoading() && makeupStaffList().length > 0">
+          <div class="makeup-staff-card" *ngFor="let s of makeupStaffList()" [class.unavailable]="!s.isAvailable"
+            (click)="selectMakeupStaff(s)">
+
+            <img
+              [src]="bookingService.buildImageUrl(config()?.base_urls?.staff_image_url || '', s.image, 'assets/images/staff-placeholder.jpg')"
+              [alt]="s.englishName" onerror="this.src='assets/images/staff-placeholder.jpg'" />
+
+            <div class="info">
+              <div class="name">{{ s.englishName }}</div>
+              <div class="name-ar">{{ s.arabicName }}</div>
+            </div>
+
+            <span class="tag" [class.ok]="s.isAvailable">
+              {{ s.isAvailable ? 'Available' : 'Busy' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="makeup-empty" *ngIf="makeupDate() && !makeupStaffLoading() && makeupStaffList().length === 0">
+          No staff available for this date
+        </div>
+
+      </div>
+    </div>
+  </ng-container>
+
+</div>

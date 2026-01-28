@@ -1,0 +1,242 @@
+/* ─────────────────────────────────────────────
+   1 ▸ Hero Section
+───────────────────────────────────────────── */
+.hero {
+  color: var(--text-color);
+
+  h1 {
+    color: var(--text-color);
+    text-shadow: 0px 2px 4px var(--product-color);
+  }
+
+  .lead {
+    color: var(--desc-color);
+  }
+
+  img {
+    max-height: 420px;
+    object-fit: cover;
+    box-shadow: var(--card-shadow-hover);
+    border: var(--card-border);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   2 ▸ Timeline Section
+───────────────────────────────────────────── */
+.timeline {
+  color: var(--text-color);
+
+  h2 {
+    text-shadow: 0px 2px 4px var(--product-color);
+    color: var(--text-color);
+    // background: linear-gradient(135deg, var(--desc-color), var(--secondary-text));
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    display: inline-block;
+    margin: 0 auto;
+    font-size: 2.8rem;
+  }
+}
+
+.timeline-line {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    width: 3px;
+    height: 100%;
+    background: var(--product-color);
+  }
+}
+
+.timeline-item {
+  position: relative;
+  margin-left: 60px;
+  margin-bottom: 2.5rem;
+
+  .dot {
+    position: absolute;
+    left: -40px;
+    top: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--product-color);
+    box-shadow: 0 0 0 4px var(--background-color) inset;
+    border: 2px solid var(--background-color);
+  }
+
+  .content {
+    background: var(--card-bg);
+    border-left: 4px solid var(--product-color);
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
+    color: var(--text-color);
+
+    h5 {
+      color: var(--product-color);
+      font-weight: 700;
+    }
+
+    p {
+      color: var(--desc-color);
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────
+   3 ▸ Values Strip Section
+───────────────────────────────────────────── */
+.values-strip {
+  background: linear-gradient(135deg, var(--product-color) 0%, var(--product-color-hover) 100%);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--backdrop-bg);
+    opacity: 0.1;
+  }
+
+  h2 {
+    color: var(--background-color);
+    position: relative;
+    z-index: 2;
+  }
+}
+
+.value-card {
+  background: var(--wishlist-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  color: var(--background-color);
+  border: var(--wishlist-border);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+
+  &:hover {
+    transform: translateY(-5px);
+    background: var(--wishlist-hover-bg);
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  i {
+    color: var(--text-color);
+    opacity: 0.9;
+    transition: all 0.3s ease;
+  }
+
+  h6 {
+    color: var(--text-color);
+    font-weight: 700;
+  }
+
+  p {
+    color: var(--text-color);
+    opacity: 0.9;
+  }
+
+  &:hover i {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Responsive Adjustments
+───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero img {
+    max-height: 300px;
+  }
+
+  .timeline-item {
+    margin-left: 50px;
+
+    .dot {
+      left: -35px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .timeline-line::before {
+    left: 15px;
+    width: 2px;
+  }
+
+  .timeline h2 {
+    padding: 0.5rem 1rem;
+    font-size: 1.5rem;
+  }
+
+  .value-card {
+    padding: 1.5rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .timeline-item {
+    margin-left: 40px;
+
+    .dot {
+      left: -30px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .timeline-line::before {
+    left: 10px;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Theme-specific Enhancements
+───────────────────────────────────────────── */
+
+// Enhanced shadow for dark themes
+[data-theme*='dark'] {
+  .timeline-item .content {
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .hero img {
+    box-shadow: var(--card-shadow-hover);
+  }
+}
+
+// Special styling for orange theme
+[data-theme='orange'] {
+  .values-strip {
+    background: linear-gradient(135deg, var(--product-color) 0%, #e55a1f 50%, var(--product-color-hover) 100%);
+  }
+}
+
+// Special styling for velvet themes
+[data-theme*='velvet'] {
+  .value-card {
+    backdrop-filter: blur(15px);
+  }
+
+  .timeline-item .dot {
+    box-shadow: 0 0 0 3px var(--background-color) inset, 0 0 20px var(--product-color);
+  }
+}
+
+// Special styling for graphite themes
+[data-theme*='graphite'] {
+  .values-strip {
+    background: linear-gradient(135deg, var(--product-color) 0%, var(--text-color) 50%, var(--product-color-hover) 100%);
+  }
+}

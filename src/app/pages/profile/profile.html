@@ -1,0 +1,309 @@
+<div class="profile-wrapper">
+  <!-- Profile Header Section -->
+  <div class="profile-header-section">
+    <div class="container">
+      <div class="profile-header-content">
+        <div class="header-text">
+          <h1 class="profile-main-title">My Profile</h1>
+          <p class="profile-subtitle">Manage your personal information and account preferences</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container profile-content">
+    <!-- Loading skeleton -->
+    <ng-container *ngIf="loading(); else loaded">
+      <div class="profile-card skeleton-card">
+        <div class="skeleton-header">
+          <div class="skeleton-avatar"></div>
+          <div class="skeleton-text-group">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-subtitle"></div>
+          </div>
+        </div>
+        <div class="skeleton-body">
+          <div class="skeleton-grid">
+            <div class="skeleton-item" *ngFor="let item of [1,2,3,4,5,6]">
+              <div class="skeleton-line skeleton-label"></div>
+              <div class="skeleton-line skeleton-value"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- After loading -->
+    <ng-template #loaded>
+      <!-- Error State -->
+      <div *ngIf="error(); else ok" class="error-state-card">
+        <div class="error-icon-wrapper">
+          <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        <div class="error-content">
+          <h3 class="error-title">Unable to load profile</h3>
+          <p class="error-message">{{ error() }}</p>
+          <button class="retry-button" (click)="fetch()">
+            <svg class="retry-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Try Again
+          </button>
+        </div>
+      </div>
+
+      <!-- Success State -->
+      <ng-template #ok>
+        <!-- ================= PROFILE VIEW ================= -->
+        <ng-container *ngIf="viewMode() === 'profile'">
+          <div class="profile-card" *ngIf="profile() as p">
+            <!-- Profile Card Header -->
+            <div class="profile-card-header">
+              <div class="profile-avatar-section">
+                <div class="profile-avatar">
+                  <svg class="avatar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                </div>
+                <div class="profile-basic-info">
+                  <h2 class="profile-name">{{ p.fullName || 'Name not provided' }}</h2>
+                  <p class="profile-email">{{ p.email || 'Email not provided' }}</p>
+                  <span class="status-badge">Active Account</span>
+                </div>
+              </div>
+              <div class="profile-actions">
+                <button class="action-button secondary" (click)="fetch()" title="Refresh Profile">
+                  <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <!-- Profile Card Body -->
+            <div class="profile-card-body">
+              <!-- Personal Information Section -->
+              <div class="info-section">
+                <div class="section-header">
+                  <div class="section-icon personal-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="section-title">Personal Information</h3>
+                </div>
+                <div class="info-grid">
+                  <div class="info-field">
+                    <label class="field-label">Full Name</label>
+                    <div class="field-value">{{ p.fullName || '—' }}</div>
+                  </div>
+                  <div class="info-field">
+                    <label class="field-label">Email Address</label>
+                    <div class="field-value">{{ p.email || '—' }}</div>
+                  </div>
+                  <div class="info-field">
+                    <label class="field-label">Phone Number</label>
+                    <div class="field-value">{{ p.mobileNo || '—' }}</div>
+                  </div>
+                  <div class="info-field" *ngIf="p.gender">
+                    <label class="field-label">Gender</label>
+                    <div class="field-value">{{ p.gender }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Account Information Section -->
+              <div class="info-section">
+                <div class="section-header">
+                  <div class="section-icon account-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V4a2 2 0 114 0v2m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+                    </svg>
+                  </div>
+                  <h3 class="section-title">Account Information</h3>
+                </div>
+                <div class="info-grid">
+                  <div class="info-field">
+                    <label class="field-label">Customer Reference</label>
+                    <div class="field-value">{{ p.customerRef || '—' }}</div>
+                  </div>
+                  <div class="info-field">
+                    <label class="field-label">Branch</label>
+                    <div class="field-value">
+                      <span *ngIf="p.branchArabicName; else branchIdOnly">
+                        {{ p.branchArabicName }}
+                      </span>
+                      <ng-template #branchIdOnly>{{ p.branchId ?? '—' }}</ng-template>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Address Information Section -->
+              <div class="info-section" *ngIf="p.address">
+                <div class="section-header">
+                  <div class="section-icon address-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="section-title">Address Information</h3>
+                </div>
+                <div class="address-display">
+                  <p class="address-text">{{ p.address }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile Card Footer -->
+            <div class="profile-card-footer">
+              <div class="footer-actions">
+                <button class="action-button primary" (click)="showChange()">
+                  <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2a2 2 0 012 2M9 7a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V9a2 2 0 00-2-2H9z"></path>
+                  </svg>
+                  Change Password
+                </button>
+                <a class="action-button outline" routerLink="/addresses">
+                  <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  Manage Addresses
+                </a>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ============== CHANGE PASSWORD VIEW ============== -->
+        <ng-container *ngIf="viewMode() === 'change'">
+          <div class="password-change-card">
+            <!-- Password Card Header -->
+            <div class="password-card-header">
+              <div class="password-header-content">
+                <div class="password-icon-wrapper">
+                  <svg class="password-main-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                  </svg>
+                </div>
+                <div class="password-header-text">
+                  <h2 class="password-title">Change Password</h2>
+                  <p class="password-subtitle">Update your password to keep your account secure</p>
+                </div>
+              </div>
+              <button class="back-button" (click)="showProfile()">
+                <svg class="back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to Profile
+              </button>
+            </div>
+
+            <!-- Password Form -->
+            <div class="password-card-body">
+              <form [formGroup]="changePwdForm" (ngSubmit)="changePassword()" class="password-form">
+                <div class="form-field">
+                  <label class="form-field-label">Current Password</label>
+                  <div class="form-input-wrapper">
+                    <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    <input 
+                      type="password" 
+                      class="form-input" 
+                      formControlName="currentPassword"
+                      placeholder="Enter current password" />
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-field-label">New Password</label>
+                  <div class="form-input-wrapper">
+                    <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2a2 2 0 012 2M9 7a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V9a2 2 0 00-2-2H9z"></path>
+                    </svg>
+                    <input 
+                      type="password" 
+                      class="form-input" 
+                      formControlName="newPassword"
+                      placeholder="Enter new password" />
+                  </div>
+                  <small class="form-hint">Password must be at least 6 characters long</small>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-field-label">Confirm New Password</label>
+                  <div class="form-input-wrapper">
+                    <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <input 
+                      type="password" 
+                      class="form-input" 
+                      formControlName="confirmNewPassword"
+                      placeholder="Confirm new password" />
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" class="action-button primary" [disabled]="changePwdForm.invalid">
+                    <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Save New Password
+                  </button>
+                  <button type="button" class="action-button secondary" (click)="showProfile()">
+                    <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+
+              <!-- Alert Messages -->
+              <div *ngIf="changePwdMessage()" class="alert-message success">
+                <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>{{ changePwdMessage() }}</span>
+              </div>
+
+              <div *ngIf="changePwdError()" class="alert-message error">
+                <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>{{ changePwdError() }}</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </ng-template>
+    </ng-template>
+  </div>
+</div>

@@ -1,0 +1,302 @@
+<!-- src/app/pages/home/home.html -->
+
+<app-header-carousel></app-header-carousel>
+<app-category-rail></app-category-rail>
+
+<div class="container">
+
+  <!-- Guest Cart Banner -->
+  <div *ngIf="(isLoggedIn$ | async) === false && (cartManager.itemCount$ | async) as cartCount" 
+       class="guest-cart-banner mb-4">
+    <div class="banner-content">
+      <div class="banner-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+      </div>
+      <div class="banner-text">
+        <strong>Shopping as Guest</strong>
+        <span>You have {{ cartCount }} item{{ cartCount > 1 ? 's' : '' }} in your cart. 
+          <a routerLink="/login" class="banner-link">Sign in</a> to save your cart and checkout.
+        </span>
+      </div>
+      <a routerLink="/cart" class="banner-action btn btn-sm btn-outline-primary">
+        View Cart
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Section Header -->
+  <div class="section-header d-flex justify-content-between align-items-center mb-4">
+    <h2 class="section-title mb-0">
+      <span>Our Products</span>
+      <small *ngIf="totalCount() > 0" class="product-count text-muted ms-2">
+        ({{ displayedCount() }} of {{ totalCount() }})
+      </small>
+    </h2>
+    
+    <button type="button" 
+            class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2"
+            (click)="refresh()"
+            [disabled]="loading()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           [class.spin]="loading()">
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+        <path d="M21 3v5h-5"/>
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+        <path d="M3 21v-5h5"/>
+      </svg>
+      <span class="d-none d-sm-inline">Refresh</span>
+    </button>
+  </div>
+
+  <!-- Initial Loading State -->
+  <ng-container *ngIf="loading(); else contentTpl">
+    <div class="loading-state py-5">
+      <div class="loading-grid row g-3">
+        <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]" class="col-6 col-sm-4 col-md-3 col-xl-2 mb-4">
+          <div class="skeleton-card">
+            <div class="skeleton-img skeleton-pulse"></div>
+            <div class="skeleton-content">
+              <div class="skeleton-title skeleton-pulse"></div>
+              <div class="skeleton-desc skeleton-pulse"></div>
+              <div class="skeleton-price skeleton-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Loading products...</p>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Main Content -->
+  <ng-template #contentTpl>
+    <!-- Empty State -->
+    <div *ngIf="isEmpty()" class="empty-state text-center py-5">
+      <div class="empty-icon mb-4">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+      </div>
+      <h4 class="empty-title">No products found</h4>
+      <p class="empty-text text-muted">
+        We couldn't find any products matching your criteria.<br>
+        Try adjusting your filters or browse our categories.
+      </p>
+      <a routerLink="/" class="btn btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Back to Home
+      </a>
+    </div>
+
+    <!-- Products Grid -->
+    <div *ngIf="products().length > 0" class="row g-3">
+      <div *ngFor="let product of products(); trackBy: trackByProductId; let i = index" 
+           class="col-6 col-sm-4 col-md-3 col-xl-2 mb-4 product-item"
+           [style.animation-delay.ms]="(i % 30) * 30">
+        
+        <div class="product-card h-100 position-relative" 
+             [routerLink]="['/product', product.itemId]"
+             [class.is-adding]="product.isAddingToCart">
+          
+          <div class="img-wrap position-relative">
+            <img [src]="product.fullImageUrl" 
+                 [alt]="product.englishName" 
+                 class="product-img w-100" 
+                 loading="lazy"
+                 onerror="this.src='assets/images/placeholder.jpg'" />
+
+            <button class="wishlist-btn" 
+                    [class.active]="product.isWished" 
+                    (click)="toggleWishlist(product, $event)"
+                    [attr.aria-label]="product.isWished ? 'Remove from wishlist' : 'Add to wishlist'">
+              <svg *ngIf="!product.isWished" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              <svg *ngIf="product.isWished" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+            </button>
+
+            <!-- <button class="quick-view-btn" 
+                    (click)="quickView(product, $event)"
+                    aria-label="Quick view">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button> -->
+
+            <button *ngIf="product.itemType !== 2"
+                    class="add-cart-btn" 
+                    (click)="addToCart(product, $event)" 
+                    [disabled]="product.isAddingToCart"
+                    [class.loading]="product.isAddingToCart">
+              <ng-container *ngIf="!product.isAddingToCart">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="9" cy="21" r="1"></circle>
+                  <circle cx="20" cy="21" r="1"></circle>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span>Add to cart</span>
+              </ng-container>
+              <ng-container *ngIf="product.isAddingToCart">
+                <span class="loading-spinner"></span>
+                <span>Adding...</span>
+              </ng-container>
+            </button>
+            <button *ngIf="product.itemType === 2"
+                    class="book-now-btn" 
+                    (click)="bookNow(product, $event)" 
+                    [disabled]="product.isBooking"
+                    [class.loading]="product.isBooking"
+                    [class.success]="product.justBooked">
+              <!-- Success State -->
+              <ng-container *ngIf="product.justBooked">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Booked!</span>
+              </ng-container>
+              <!-- Loading State -->
+              <ng-container *ngIf="product.isBooking && !product.justBooked">
+                <span class="loading-spinner"></span>
+                <span>Booking...</span>
+              </ng-container>
+              <!-- Default State -->
+              <ng-container *ngIf="!product.isBooking && !product.justBooked">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>Book Now</span>
+              </ng-container>
+            </button>
+            <div class="sale-badge" *ngIf="product.discountPercentage">
+              <span>-{{ product.discountPercentage }}%</span>
+            </div>
+          </div>
+
+          <div class="card-content">
+            <h6 class="product-title">{{ product.englishName }}</h6>
+            
+            <p class="product-desc" *ngIf="product.unitEnglishName">
+              {{ (product.unitEnglishName || '') | slice:0:45 }}
+              <span *ngIf="product.unitEnglishName.length > 45">&hellip;</span>
+            </p>
+
+            <div class="card-footer">
+              <div class="price-section">
+                <span class="current-price">{{ product.price | number:'1.3-3' }} KWD</span>
+                <span class="original-price" *ngIf="product.originalPrice">
+                  {{ product.originalPrice | number:'1.3-3' }} KWD
+                </span>
+              </div>
+            </div>
+
+            <div class="guest-add-indicator" *ngIf="product.justAdded && (isLoggedIn$ | async) === false">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>Saved locally</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== LOAD MORE SECTION ========== -->
+    <div class="load-more-section text-center mt-2 mb-5" *ngIf="products().length > 0">
+      
+      <!-- Loading More Spinner -->
+      <div *ngIf="loadingMore()" class="loading-more mb-3">
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <span class="text-muted">Loading more products...</span>
+        </div>
+      </div>
+
+      <!-- Load More Button -->
+      <button *ngIf="showLoadMore()" 
+              class="btn btn-outline-primary btn-lg load-more-btn"
+              (click)="loadMore()"
+              [disabled]="loadingMore()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Load More Products</span>
+        <span class="remaining-badge ms-2">
+          {{ remainingCount() }} more
+        </span>
+      </button>
+
+      <!-- All Products Loaded Message -->
+      <div *ngIf="!hasMore() && !loadingMore() && products().length > 0" class="end-of-products">
+        <div class="end-line">
+          <div class="end-divider"></div>
+          <span class="end-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+          <div class="end-divider"></div>
+        </div>
+        <p class="end-text mt-3 mb-2">
+          You've seen all <strong>{{ totalCount() }}</strong> products
+        </p>
+        <button type="button" class="btn btn-sm btn-outline-secondary mb-5" (click)="refresh()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
+</div>
+
+<!-- Floating Cart Button (Mobile) -->
+<!-- <div class="floating-cart d-lg-none" *ngIf="cartManager.itemCount$ | async as cartCount">
+  <button class="floating-cart-btn" routerLink="/cart" [class.has-items]="cartCount > 0">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="9" cy="21" r="1"></circle>
+      <circle cx="20" cy="21" r="1"></circle>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+    </svg>
+    <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount > 99 ? '99+' : cartCount }}</span>
+  </button>
+</div> -->
+
+<!-- Cart Toast -->
+<div class="cart-toast" [class.show]="showCartToast">
+  <div class="toast-content">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span>Added to cart</span>
+  </div>
+  <a routerLink="/cart" class="toast-action">View Cart</a>
+</div>

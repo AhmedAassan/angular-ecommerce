@@ -1,0 +1,768 @@
+// src/app/pages/login/login.scss
+
+// ===== Base Wrapper =====
+.auth-wrapper {
+  max-width: 520px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+// ===== Header Section =====
+.auth-header {
+  .register-header {
+    color: var(--product-color);
+    margin: 0;
+    letter-spacing: -0.025em;
+  }
+
+  .helper {
+    color: var(--desc-color);
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// ===== Guest Cart Notice =====
+.guest-cart-notice {
+  max-width: 100%;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border: 1px solid #a5d6a7;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  animation: slideDown 0.3s ease-out;
+
+  .notice-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .notice-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #43a047;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .notice-text {
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      display: block;
+      color: #2e7d32;
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+
+    p {
+      color: #558b2f;
+      font-size: 0.85rem;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  .notice-badge {
+    flex-shrink: 0;
+
+    .badge {
+      background: #43a047;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+  }
+
+  // Responsive
+  @media (max-width: 480px) {
+    .notice-content {
+      flex-wrap: wrap;
+    }
+
+    .notice-badge {
+      width: 100%;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+// ===== Redirect Notice =====
+.redirect-notice {
+  max-width: 100%;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: 1px solid #90caf9;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  animation: slideDown 0.3s ease-out;
+
+  .notice-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .notice-icon {
+    color: #1976d2;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .notice-text {
+    font-size: 0.875rem;
+    color: #1565c0;
+    line-height: 1.4;
+
+    strong {
+      color: #0d47a1;
+    }
+  }
+}
+
+// ===== Card Styling =====
+.auth-card {
+  border-radius: 1.25rem;
+  background-color: var(--card-bg);
+  border: var(--card-border);
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+  }
+}
+
+// ===== Form Groups =====
+.form-group {
+  position: relative;
+
+  .form-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+
+    .label-text {
+      flex: 1;
+    }
+
+    .required-asterisk {
+      color: var(--sale-color);
+      margin-left: 0.25rem;
+      font-weight: 700;
+    }
+  }
+}
+
+// ===== Input Wrapper with Icons =====
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .input-icon {
+    position: absolute;
+    left: 0.875rem;
+    z-index: 2;
+    color: var(--icon-color);
+    pointer-events: none;
+    transition: color 0.2s ease;
+
+    svg {
+      display: block;
+    }
+  }
+
+  .form-control {
+    padding-left: 2.75rem;
+    padding-right: 3rem;
+
+    &:focus + .input-icon,
+    &:focus ~ .input-icon {
+      color: var(--product-color);
+    }
+  }
+}
+
+// ===== Form Controls =====
+.form-control {
+  background-color: var(--input-bg);
+  border: var(--input-border);
+  color: var(--text-color);
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  transition: all 0.2s ease;
+
+  &::placeholder {
+    color: var(--placeholder-color);
+    opacity: 0.8;
+  }
+
+  &:focus {
+    background-color: var(--input-focus-bg);
+    border-color: var(--product-color);
+    box-shadow: 0 0 0 3px rgba(244, 109, 41, 0.1);
+    outline: none;
+  }
+
+  &.ng-touched.ng-valid:not(.is-invalid) {
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+  }
+
+  &.is-invalid {
+    border-color: var(--sale-color);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+    }
+  }
+}
+
+// ===== Remember Me Checkbox =====
+.form-check {
+  .form-check-input {
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: 0.1rem;
+    border-color: var(--border-color, #dee2e6);
+    cursor: pointer;
+
+    &:checked {
+      background-color: var(--product-color);
+      border-color: var(--product-color);
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(244, 109, 41, 0.15);
+    }
+  }
+
+  .form-check-label {
+    color: var(--desc-color);
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+  }
+}
+
+// ===== Password Toggle Button =====
+.password-toggle {
+  position: absolute;
+  right: 0.875rem;
+  background: none;
+  border: none;
+  color: var(--icon-color);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  z-index: 2;
+
+  &:hover {
+    color: var(--product-color);
+    background-color: rgba(244, 109, 41, 0.1);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--product-color);
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+// ===== Submit Button =====
+.submit-btn {
+  background: linear-gradient(135deg, var(--product-color), var(--product-color-hover));
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.875rem;
+  font-size: 1rem;
+  box-shadow: var(--card-shadow);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  &:hover:not([disabled]) {
+    background: linear-gradient(135deg, var(--product-color-hover), var(--product-color));
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active:not([disabled]) {
+    transform: translateY(0) scale(0.98);
+    box-shadow: var(--card-shadow);
+  }
+
+  &[disabled] {
+    background: var(--desc-color);
+    color: rgba(255, 255, 255, 0.7);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  .spinner-border {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  // Cart Sync Hint (shows when guest has items)
+  .cart-sync-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.9;
+    padding: 3px 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    margin-left: 4px;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+// ===== Divider =====
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--desc-color);
+  font-size: 0.85rem;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color, #dee2e6);
+  }
+
+  span {
+    padding: 0 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+// ===== Social Login Buttons =====
+.social-login-buttons {
+  .social-btn {
+    height: 46px;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border-color, #dee2e6);
+    background: var(--card-bg);
+    color: var(--text-color);
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: var(--hover-bg, #f8f9fa);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+}
+
+// ===== Footer Section =====
+.auth-footer {
+  .login-prompt {
+    color: var(--desc-color);
+    font-size: 0.95rem;
+    margin: 0;
+
+    .login-link {
+      color: var(--product-color);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.15s ease;
+
+      &:hover {
+        color: var(--product-color-hover);
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// ===== Forgot Password Link =====
+.forgot {
+  color: var(--desc-color);
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  .question-icon {
+    font-size: 0.75rem;
+  }
+
+  &:hover {
+    color: var(--product-color);
+  }
+}
+
+// ===== Error Alert =====
+.error-alert {
+  background: linear-gradient(135deg,
+    rgba(239, 68, 68, 0.1),
+    rgba(220, 53, 69, 0.08)
+  );
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 0.875rem;
+  padding: 0;
+  animation: shake 0.3s ease-in-out;
+
+  .error-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 1rem;
+
+    .error-icon {
+      color: var(--sale-color);
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+    }
+
+    .error-text {
+      flex: 1;
+      min-width: 0;
+
+      strong {
+        display: block;
+        color: var(--sale-color);
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+      }
+
+      p {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 0.9rem;
+        line-height: 1.4;
+        opacity: 0.9;
+      }
+    }
+
+    .error-close {
+      background: none;
+      border: none;
+      color: var(--icon-color);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 0.375rem;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+
+      &:hover {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--sale-color);
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--sale-color);
+      }
+    }
+  }
+}
+
+// ===== Invalid Feedback =====
+.invalid-feedback {
+  color: var(--sale-color);
+  font-size: 0.825rem;
+  margin-top: 0.375rem;
+  font-weight: 500;
+  display: block;
+}
+
+// ===== Loading Overlay =====
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--backdrop-bg, rgba(255, 255, 255, 0.9));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+.loading-content {
+  text-align: center;
+  color: var(--text-color);
+  padding: 2rem;
+  background: var(--card-bg);
+  border-radius: 1rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  max-width: 280px;
+
+  .loading-spinner {
+    .spinner-border {
+      width: 48px;
+      height: 48px;
+      border-width: 4px;
+      color: var(--product-color);
+    }
+  }
+
+  .loading-text {
+    margin-top: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+  }
+
+  .loading-cart-info {
+    margin-top: 0.5rem;
+
+    small {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      color: var(--desc-color);
+      font-size: 0.85rem;
+
+      svg {
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+// ===== Animations =====
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+// ===== Responsive Design =====
+@media (max-width: 576px) {
+  .auth-wrapper {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .auth-card {
+    margin: 0;
+    border-radius: 1rem;
+    padding: 1.5rem !important;
+  }
+
+  .register-header {
+    font-size: 1.5rem;
+  }
+
+  .helper {
+    font-size: 0.9rem;
+  }
+
+  .form-control {
+    font-size: 16px; // Prevents zoom on iOS
+  }
+
+  .input-icon {
+    left: 0.75rem;
+  }
+
+  .form-control {
+    padding-left: 2.5rem;
+    padding-right: 2.75rem;
+  }
+
+  .password-toggle {
+    right: 0.75rem;
+  }
+
+  .social-login-buttons {
+    flex-direction: column;
+
+    .social-btn {
+      width: 100%;
+    }
+  }
+
+  .guest-cart-notice,
+  .redirect-notice {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 375px) {
+  .auth-card {
+    padding: 1.25rem !important;
+  }
+
+  .form-group {
+    margin-bottom: 1rem !important;
+  }
+
+  .submit-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+
+    .cart-sync-hint {
+      width: 100%;
+      justify-content: center;
+      margin-left: 0;
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+// ===== Dark Mode Adjustments =====
+[data-theme="dark"] {
+  .guest-cart-notice {
+    background: linear-gradient(135deg, rgba(46, 125, 50, 0.2) 0%, rgba(67, 160, 71, 0.15) 100%);
+    border-color: rgba(76, 175, 80, 0.3);
+
+    .notice-icon {
+      background: rgba(255, 255, 255, 0.1);
+      color: #81c784;
+    }
+
+    .notice-text {
+      strong { color: #a5d6a7; }
+      p { color: #81c784; }
+    }
+
+    .notice-badge .badge {
+      background: #43a047;
+    }
+  }
+
+  .redirect-notice {
+    background: linear-gradient(135deg, rgba(25, 118, 210, 0.15) 0%, rgba(33, 150, 243, 0.1) 100%);
+    border-color: rgba(33, 150, 243, 0.3);
+
+    .notice-icon { color: #64b5f6; }
+    .notice-text {
+      color: #90caf9;
+      strong { color: #bbdefb; }
+    }
+  }
+
+  .loading-overlay {
+    background-color: rgba(0, 0, 0, 0.85);
+  }
+
+  .social-btn {
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+}

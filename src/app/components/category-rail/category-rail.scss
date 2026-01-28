@@ -1,0 +1,424 @@
+// .tag-rail {
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+//   position: relative;
+//   top: -1%;
+//   transform: translateY(-50%);
+//   overflow: hidden;
+//   padding: 0;
+//   white-space: nowrap;
+// }
+
+// .rail-container {
+//   overflow: hidden;
+//   height: 36px;
+//   padding-top: 6px;
+//   cursor: grab;
+//   scroll-behavior: smooth;
+// }
+
+// .tag {
+//   background: transparent;
+//   border-radius: 8px;
+//   padding: 3px 8px 4px;
+//   margin: 5px 4px;
+//   color: var(--text-color);
+//   font-weight: 500;
+//   user-select: none;
+//   border: var(--input-border);
+//   transition-duration: 0.25s;
+//   white-space: nowrap;
+//   text-decoration: none;
+// }
+
+// .tag:hover {
+//   background: var(--card-header-hover);
+//   color: var(--text-color);
+//   border-color: var(--product-color);
+// }
+
+// .tag:active {
+//   background: var(--card-header-active);
+// }
+
+// .tag-selected {
+//   background: var(--product-color);
+//   color: var(--background-color);
+//   border: 1px solid var(--product-color);
+// }
+
+// .tag-selected:hover {
+//   background: var(--product-color-hover);
+//   color: var(--background-color);
+//   border-color: var(--product-color-hover);
+// }
+
+// .tag-selected:active {
+//   background: var(--product-color-hover);
+//   color: var(--background-color);
+// }
+
+// .btn-left-con,
+// .btn-right-con {
+//   position: absolute;
+//   z-index: 10;
+// }
+
+// .btn-right-con {
+//   right: 0;
+// }
+
+// .btn-left,
+// .btn-right {
+//   height: 32px;
+//   width: 32px;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   font-size: 24px;
+//   border-radius: 100%;
+//   cursor: pointer;
+//   transition-duration: 0.25s;
+//   box-shadow: 0 0 16px 24px var(--background-color);
+//   background: var(--background-color);
+//   color: var(--icon-color);
+//   border: var(--input-border);
+// }
+
+// .btn-left {
+//   margin-left: 2px;
+// }
+
+// .btn-right {
+//   margin-right: 2px;
+// }
+
+// .btn-left:hover,
+// .btn-right:hover {
+//   background: var(--card-header-hover);
+//   color: var(--product-color);
+//   border-color: var(--product-color);
+// }
+
+// .btn-left:active,
+// .btn-right:active {
+//   background: var(--card-header-active);
+//   color: var(--product-color-hover);
+// }
+
+// .d-none {
+//   display: none;
+// }
+
+// Category rail uses existing theme variables - no additional variables needed
+// All styling will reference the global theme variables from your themes.scss
+
+// Main component styles
+.category-rail {
+  position: relative;
+  width: 90%;
+  padding: 16px 0;
+  margin: 8px auto 24px auto;
+  background: var(--background-color);
+  
+  // Loading state
+  &.loading {
+    pointer-events: none;
+  }
+}
+
+// Loading skeleton
+.loading-skeleton {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px;
+
+  .skeleton-item {
+    height: 36px;
+    width: 80px;
+    border-radius: 18px;
+    background: linear-gradient(
+      90deg,
+      var(--image-bg) 25%,
+      var(--card-header-hover) 50%,
+      var(--image-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+
+    &:first-child {
+      width: 60px; // "All" category
+    }
+
+    &:nth-child(even) {
+      width: 100px;
+    }
+
+    &:last-child {
+      width: 70px;
+    }
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// Rail wrapper
+.rail-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+// Scroll buttons
+.scroll-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: var(--input-border);
+  border-radius: 50%;
+  background: var(--card-bg);
+  color: var(--icon-color);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.8);
+  box-shadow: var(--card-shadow);
+  z-index: 3;
+  flex-shrink: 0;
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--card-header-hover);
+    border-color: var(--product-color);
+    color: var(--product-color);
+    transform: scale(1.05);
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .scroll-icon {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover:not(:disabled) .scroll-icon {
+    transform: translateX(1px);
+  }
+
+  &--left:hover:not(:disabled) .scroll-icon {
+    transform: translateX(-1px);
+  }
+}
+
+// Rail container
+.rail-container {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  position: relative;
+  padding: 4px 0;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// Categories track
+.categories-track {
+  display: flex;
+  gap: 8px;
+  padding: 0 4px;
+  min-width: min-content;
+  align-items: center;
+}
+
+// Category tags
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: nowrap;
+  border: var(--input-border);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  cursor: pointer;
+  min-height: 36px;
+  overflow: hidden;
+  
+  // Prevent text selection during drag
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  &:focus {
+    outline: 2px solid var(--product-color);
+    outline-offset: 2px;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  .category-label {
+    position: relative;
+    z-index: 1;
+    transition: transform 0.2s ease;
+  }
+
+  // Hover state
+  &:hover:not(.active) {
+    background: var(--card-header-hover);
+    color: var(--text-color);
+    border-color: var(--product-color);
+    transform: translateY(-1px);
+    box-shadow: var(--card-shadow-hover);
+
+    .category-label {
+      transform: scale(1.02);
+    }
+  }
+
+  // Active state
+  &.active {
+    background: var(--product-color);
+    color: var(--background-color);
+    border-color: var(--product-color);
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-1px);
+
+    &:hover {
+      background: var(--product-color-hover);
+      border-color: var(--product-color-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--card-shadow-hover);
+    }
+  }
+}
+
+// Empty state
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  color: var(--desc-color);
+
+  .empty-message {
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+    opacity: 0.8;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .category-rail {
+    padding: 12px 0;
+    margin: 8px 0 16px;
+  }
+
+  .rail-wrapper {
+    gap: 4px;
+  }
+
+  .scroll-button {
+    width: 36px;
+    height: 36px;
+
+    .scroll-icon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .category-tag {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-height: 32px;
+  }
+
+  .categories-track {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-rail {
+    padding: 8px 0;
+  }
+
+  .scroll-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .category-tag {
+    padding: 4px 10px;
+    font-size: 12px;
+    min-height: 28px;
+  }
+
+  .categories-track {
+    gap: 4px;
+    padding: 0 2px;
+  }
+}
+
+// Print styles
+@media print {
+  .category-rail {
+    display: none;
+  }
+}
+
+// Reduce motion accessibility
+@media (prefers-reduced-motion: reduce) {
+  .category-tag,
+  .scroll-button,
+  .category-highlight,
+  .skeleton-item {
+    transition: none;
+    animation: none;
+  }
+
+  .rail-container {
+    scroll-behavior: auto;
+  }
+}
