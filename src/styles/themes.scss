@@ -1,11 +1,14 @@
 :root {
   // Existing variables
-  --product-color: #f46d29;
-  --product-color-hover: #e55a1f;
-  --background-color: #ffffff;
-  --text-color: #1a1a1a;
-  --desc-color: #6b7280;
-  --card-bg: #ffffff;
+  --product-color: #7A8468;
+  --product-color-hover: #9EAA8A;
+  --background: url("../assets/images/MainBackground.png");
+  // --background-color:#F7F3E0;
+  --heading-color: #2F3A2E; /* زيتوني غامق جدًا */
+  --text-color: #1E1E1E; /* قراءة مريحة */
+  --desc-color: #5F5F5F;
+  --desc-color: #5F5F5F;
+  --card-bg: url("../assets/images/BackgroundCard.png");
   --image-bg: #f8f9fa;
   --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -67,8 +70,8 @@
   --scrollbar-track: #f1f5f9;
   --scrollbar-thumb: #cbd5e1;
 
-  --booking-color: #2563eb;       
-  --booking-color-hover: #1d4ed8;
+  --booking-color: #7A8468;       
+  --booking-color-hover: #9EAA8A;
 }
 
 [data-theme='dark'] {

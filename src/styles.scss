@@ -25,13 +25,54 @@
 @use './styles/themes.scss';
 
 /* Base styles for html & body */
-html, body {
-  height: 100%;
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  transition: background-color 0.5s ease, color 0.5s ease;
-    
-  /* ✅ Theme variables */
-  background-color: var(--background-color);
+html{
+  min-height: 100%;
+  background: var(--background);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+body{
+  min-height: 100vh;
+  background: transparent !important; /* مهم */
+  h1, h2, h3, h4 {
+  color: var(--heading-color) !important;
+  }
   color: var(--text-color);
+}
+
+.app-splash{
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  z-index: 999999;
+}
+
+.app-splash .splash-logo img{
+  width: 130px;
+  height: auto;
+}
+
+.app-splash .splash-spinner{
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(0,0,0,0.12);
+  border-top-color: rgba(0,0,0,0.55);
+  border-radius: 50%;
+  animation: splashSpin .8s linear infinite;
+}
+
+@keyframes splashSpin{ to { transform: rotate(360deg); } }
+
+.app-splash.hide{
+  opacity: 0;
+  visibility: hidden;
+  transition: .25s ease;
 }

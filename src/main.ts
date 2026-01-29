@@ -74,9 +74,20 @@ function authInit() {
 bootstrapApplication(App, {
   ...appConfig,
   providers: [
-    ...(appConfig.providers || []),
-    provideAnimations(),
-    provideHttpClient(withInterceptors([authInterceptor])),
-    provideAppInitializer(authInit),
+  ...(appConfig.providers || []),
+  provideAnimations(),
+  provideHttpClient(withInterceptors([authInterceptor])),
+  provideAppInitializer(authInit),
   ],
-}).catch(err => console.error('App bootstrap failed:', err));
+  })
+  .then(() => {
+  const splash = document.getElementById('app-splash');
+  if (splash) {
+  splash.classList.add('hide');
+  setTimeout(() => splash.remove(), 300);
+  }
+  }).catch(err => {
+    console.error('App bootstrap failed:', err);
+    const splash = document.getElementById('app-splash');
+    if (splash) splash.remove(); 
+    });

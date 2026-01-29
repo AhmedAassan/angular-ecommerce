@@ -1,6 +1,7 @@
 <!-- src/app/components/navbar/navbar.html -->
-<nav class="navbar navbar-expand-lg fixed-top shadow" [class.bg-dark]="isBsDark" [class.bg-body-tertiary]="!isBsDark"
-  [attr.data-bs-theme]="isBsDark ? 'dark' : null">
+<!-- <nav class="navbar navbar-expand-lg fixed-top shadow" [class.bg-dark]="isBsDark" [class.bg-body-tertiary]="!isBsDark"
+  [attr.data-bs-theme]="isBsDark ? 'dark' : null"> -->
+<nav class="navbar navbar-expand-lg fixed-top shadow">
   <div class="container-fluid">
 
     <!-- Mobile Toggle -->
@@ -10,7 +11,18 @@
     </button>
 
     <!-- Brand -->
-    <a class="navbar-brand ms-auto" routerLink="/">E-Shop</a>
+    <a class="navbar-brand ms-auto brand" routerLink="/">
+      <picture class="site-logo">
+        <!-- <source srcset="assets/images/logo-transparent.webp" type="image/webp"> -->
+        <img src="assets/images/logo-transparent.png" alt="Maracesheya" class="brand-logo">
+      </picture>
+
+
+      <span class="brand-text">
+        <span class="brand-name">Maracesheya</span>
+        <small class="brand-tag">Beauty & Services</small>
+      </span>
+    </a>
 
     <!-- Mobile Cart (Always Visible) -->
     <ul class="navbar-nav ms-auto d-block d-lg-none">
@@ -185,7 +197,8 @@
                 </a>
               </li>
               <li>
-                <a class="dropdown-item d-flex align-items-center gap-2" routerLink="/booking-billing" routerLinkActive="active">
+                <a class="dropdown-item d-flex align-items-center gap-2" routerLink="/booking-billing"
+                  routerLinkActive="active">
                   <i class="bi bi-box-seam"></i>
                   <span>My Booking</span>
                 </a>
