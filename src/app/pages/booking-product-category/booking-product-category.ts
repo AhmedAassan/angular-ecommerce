@@ -39,14 +39,12 @@ import { ProductService } from '../../services/product';
 type PageView = 'products' | 'booking';
 
 interface BookingFormState {
-  date: string;                 // YYYY-MM-DD
-  time: string; // HH:mm ✅ NEW
+  date: string;
+  time: string;
   staffId: number | null;
   serviceType: 0 | 1;
   persons: number;
   notes: string;
-  otp: string;
-  bookingId: number | null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -87,11 +85,12 @@ export class BookingProductCategory implements OnInit {
       .map(i => i.englishName.trim())
       .filter(Boolean);
 
-    const moreCount = items.length - firstThree.length; // لو أكتر من 3
+    const moreCount = items.length - firstThree.length;
     return moreCount > 0
       ? `${firstThree.join(', ')} +${moreCount}`
       : firstThree.join(', ');
   });
+
   // ─────────────────────────────────────────────────────────────────────────
   // STATE
   // ─────────────────────────────────────────────────────────────────────────
@@ -102,7 +101,6 @@ export class BookingProductCategory implements OnInit {
   isLoading = signal(true);
   isLoadingStaff = signal(false);
   isSubmitting = signal(false);
-  isVerifying = signal(false);
 
   // Route Params
   categoryId = signal<number>(0);
@@ -131,13 +129,21 @@ export class BookingProductCategory implements OnInit {
 
   paymentTermsText = computed(() => (this.config()?.business_info?.paymentTerms || '').trim());
   hasPaymentTerms = computed(() => this.paymentTermsText().length > 0);
+
   // Payment Settings
   depositAmount = computed(() => this.category()?.deposit ?? 0);
   isDeposit = computed(() => (this.category()?.deposit ?? 0) !== 0);
 
   // UI States
   staffDropdownOpen = signal(false);
-  showOtpStep = signal(false);
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // PAYMENT SUCCESS STATE
+  // ─────────────────────────────────────────────────────────────────────────
+  
+  showPaymentSuccess = signal(false);
+  paymentUrl = signal('');
+  paymentMessage = signal('');
 
   // Form State
   form = signal<BookingFormState>({
@@ -146,23 +152,23 @@ export class BookingProductCategory implements OnInit {
     staffId: null,
     serviceType: 0,
     persons: 1,
-    notes: '',
-    otp: '',
-    bookingId: null
+    notes: ''
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // MAKEUP FLOW STATE
+  // MAKEUP FLOW STATE (NOW SHARED WITH OLD FLOW FOR TIME SLOTS)
   // ─────────────────────────────────────────────────────────────────────────
 
   makeupMode = signal(false);
   preSelectedStaff = signal<Staff | null>(null);
 
-  // items by staff + timeslots
   itemsByStaff = signal<ServiceItem[]>([]);
   selectedItemIds = signal<number[]>([]);
+  
+  // TIME SLOTS - Now used by both flows
   timeSlots = signal<string[]>([]);
   selectedTimeSlot = signal<string>('');
+  showTimeSlotModal = signal(false);
 
   isLoadingItems = signal(false);
   isLoadingSlots = signal(false);
@@ -175,12 +181,21 @@ export class BookingProductCategory implements OnInit {
     this.staffList().find(s => s.id === this.form().staffId) || null
   );
 
-  // في الميكب فلو: الـ staff بيتحدد من برّه (query/state) ومش لازم dropdown
   effectiveStaff = computed(() => this.preSelectedStaff() || this.selectedStaff());
 
   isMakeupCategory = computed(() => {
     const cat = this.category();
     return !!cat?.isMakeup;
+  });
+
+  // Check if time slot can be selected (for old flow)
+  canSelectTimeSlot = computed(() => {
+    if (this.makeupMode() && this.isMakeupCategory()) {
+      // Makeup flow: need date and items
+      return !!this.form().date && this.selectedItemIds().length > 0;
+    }
+    // Old flow: need date, staff, and service
+    return !!this.form().date && !!this.form().staffId && !!this.selectedService();
   });
 
   canSubmitBooking = computed(() => {
@@ -192,23 +207,19 @@ export class BookingProductCategory implements OnInit {
     if (!f.date || !f.staffId) return false;
     if (f.persons < 1) return false;
 
+    // Both flows now require selectedTimeSlot
+    if (!this.selectedTimeSlot()) return false;
+
     // Makeup flow requirements
     if (this.makeupMode() && category.isMakeup) {
       if (this.selectedItemIds().length === 0) return false;
-      if (!this.selectedTimeSlot()) return false;
       return true;
     }
 
     // Old flow requirements
     const service = this.selectedService();
     if (!service) return false;
-    if (!f.time) return false;
     return true;
-  });
-
-  canVerifyOtp = computed(() => {
-    const f = this.form();
-    return f.bookingId && f.otp.length >= 4;
   });
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -219,17 +230,14 @@ export class BookingProductCategory implements OnInit {
     this.loadData();
   }
 
-  // Close dropdown when clicking outside
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
 
-    // staff dropdown
     if (!target.closest('.staff-dropdown-wrapper')) {
       this.staffDropdownOpen.set(false);
     }
 
-    // items dropdown
     if (!target.closest('.items-dropdown-wrapper')) {
       this.itemsDropdownOpen.set(false);
     }
@@ -240,12 +248,10 @@ export class BookingProductCategory implements OnInit {
   // ─────────────────────────────────────────────────────────────────────────
 
   private loadData(): void {
-    // Route params
     const params = this.route.snapshot.params;
     this.categoryId.set(+params['categoryId'] || 0);
     this.branchId.set(+params['branchId'] || 0);
 
-    // Query params (makeup mode)
     const qp = this.route.snapshot.queryParamMap;
     this.makeupMode.set(qp.get('makeup') === '1');
 
@@ -255,7 +261,6 @@ export class BookingProductCategory implements OnInit {
     if (qpStaffId) this.updateForm({ staffId: qpStaffId });
     if (qpDate) this.updateForm({ date: qpDate });
 
-    // staff from navigation state (optional)
     const nav = this.router.getCurrentNavigation();
     const stateStaff = (nav?.extras?.state as any)?.staff as Staff | undefined;
     this.preSelectedStaff.set(stateStaff ?? null);
@@ -291,21 +296,13 @@ export class BookingProductCategory implements OnInit {
           this.category.set(category || null);
           this.branch.set(branch || null);
 
-          // Decide which flow
           if (this.makeupMode() && category?.isMakeup) {
-            // Directly go to booking view (confirm screen)
             this.currentView.set('booking');
-            this.showOtpStep.set(false);
-
-            // load items by staff (requires categoryId + staffId)
             this.loadItemsByStaff();
             this.ensureMakeupStaffLoaded();
-            // load time slots if already have date + selected items (not yet)
-            // time slots will be loaded after selecting items
             this.isLoading.set(false);
             this.cdr.markForCheck();
           } else {
-            // Old flow: load services list (products view)
             this.loadServices();
           }
         },
@@ -366,6 +363,7 @@ export class BookingProductCategory implements OnInit {
     this.productImageBase.set(cfg.base_urls?.product_image_url || '');
     this.currency.set(cfg.currency_symbol || 'KWD');
   }
+
   private ensureMakeupStaffLoaded(): void {
     if (this.preSelectedStaff()) return;
 
@@ -382,6 +380,7 @@ export class BookingProductCategory implements OnInit {
         this.cdr.markForCheck();
       });
   }
+
   // ─────────────────────────────────────────────────────────────────────────
   // FORM HELPERS
   // ─────────────────────────────────────────────────────────────────────────
@@ -397,18 +396,15 @@ export class BookingProductCategory implements OnInit {
       staffId: null,
       serviceType: 0,
       persons: 1,
-      notes: '',
-      otp: '',
-      bookingId: null
+      notes: ''
     });
+    // Reset time slots
+    this.timeSlots.set([]);
+    this.selectedTimeSlot.set('');
   }
-  // ✅ Modal open/close
-  showTimeSlotModal = signal(false);
 
-  // ✅ Build 8 days strip like screenshot (based on today or selected date)
   weekDays = computed(() => {
     const base = this.form().date ? new Date(this.form().date) : new Date();
-    // normalize to local date (no time)
     const start = new Date(base.getFullYear(), base.getMonth(), base.getDate());
 
     return Array.from({ length: 8 }).map((_, i) => {
@@ -416,21 +412,18 @@ export class BookingProductCategory implements OnInit {
       d.setDate(start.getDate() + i);
 
       const iso = d.toISOString().split('T')[0];
-      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' }); // Mon, Tue
-      const dayNum = d.getDate(); // 12, 13...
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const dayNum = d.getDate();
 
       return { iso, dayName, dayNum };
     });
   });
 
   openTimeSlotModal(): void {
-    // require date + at least 1 item
-    if (!this.form().date) return;
-    if (this.makeupMode() && this.isMakeupCategory() && this.selectedItemIds().length === 0) return;
+    if (!this.canSelectTimeSlot()) return;
 
     this.showTimeSlotModal.set(true);
 
-    // ensure slots loaded
     if (this.timeSlots().length === 0 && !this.isLoadingSlots()) {
       this.loadTimeSlots();
     }
@@ -442,7 +435,7 @@ export class BookingProductCategory implements OnInit {
 
   selectDay(iso: string): void {
     this.updateForm({ date: iso });
-    this.onDateChange(); // your existing function resets + reloads slots for makeup
+    this.onDateChange();
   }
 
   confirmSlot(): void {
@@ -450,27 +443,23 @@ export class BookingProductCategory implements OnInit {
     this.closeTimeSlotModal();
   }
 
-  /** Optional: display nice label from API slot string */
   formatSlotLabel(slot: string): string {
-    // لو جاي "10:00" خلاص
     const s = (slot || '').trim();
 
-    // لو جاي "AM 08:30" -> "08:30"
     const parts = s.split(' ').filter(Boolean);
     if (parts.length === 2 && (parts[0] === 'AM' || parts[0] === 'PM')) {
       return parts[1];
     }
 
-    // لو جاي "08:30 AM" -> "08:30"
     if (parts.length === 2 && (parts[1] === 'AM' || parts[1] === 'PM')) {
       return parts[0];
     }
 
-    // لو جاي "10:00 - 10:05" -> "10:00"
     if (s.includes('-')) return s.split('-')[0].trim();
 
     return s;
   }
+
   getToday(): string {
     return new Date().toISOString().split('T')[0];
   }
@@ -500,7 +489,6 @@ export class BookingProductCategory implements OnInit {
   }
 
   goBackToProducts(): void {
-    // لو makeup mode، الرجوع يرجعك لصفحة categories (لأن ده flow مختلف جاي من panel)
     if (this.makeupMode() && this.isMakeupCategory()) {
       this.router.navigate(['/booking-category']);
       return;
@@ -508,7 +496,6 @@ export class BookingProductCategory implements OnInit {
 
     this.currentView.set('products');
     this.selectedService.set(null);
-    this.showOtpStep.set(false);
     this.staffList.set([]);
     this.resetForm();
   }
@@ -518,11 +505,14 @@ export class BookingProductCategory implements OnInit {
   // ─────────────────────────────────────────────────────────────────────────
 
   selectService(service: ServiceItem): void {
-    // old flow: only booking items
     if (service.itemType !== this.ITEM_TYPE_BOOKING) return;
 
     this.selectedService.set(service);
     this.currentView.set('booking');
+    
+    // Reset time slots when service changes
+    this.timeSlots.set([]);
+    this.selectedTimeSlot.set('');
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -533,7 +523,6 @@ export class BookingProductCategory implements OnInit {
     event?.stopPropagation();
     event?.preventDefault();
 
-    // itemType = 1 only
     if (service.itemType !== 1) return;
 
     const itemId = Number(service.id);
@@ -612,15 +601,19 @@ export class BookingProductCategory implements OnInit {
   // ─────────────────────────────────────────────────────────────────────────
 
   onDateChange(): void {
-    // لو makeup mode: ما نلمسش staffId (هو ثابت) بس نعيد تحميل time slots لو items مختارة
+    // Reset time slots when date changes
+    this.timeSlots.set([]);
+    this.selectedTimeSlot.set('');
+
     if (this.makeupMode() && this.isMakeupCategory()) {
-      this.timeSlots.set([]);
-      this.selectedTimeSlot.set('');
-      this.loadTimeSlots(); // لو فيه items
+      // Makeup flow: load time slots if items are selected
+      if (this.selectedItemIds().length > 0) {
+        this.loadTimeSlots();
+      }
       return;
     }
 
-    // old flow
+    // Old flow: reset staff and load staff list
     this.updateForm({ staffId: null, time: '' });
     this.loadStaff();
   }
@@ -649,13 +642,14 @@ export class BookingProductCategory implements OnInit {
       .subscribe(staff => this.staffList.set(staff));
   }
 
-  // Staff Dropdown (old flow)
   toggleStaffDropdown(): void {
     this.staffDropdownOpen.update(v => !v);
   }
+
   toggleItemsDropdown(): void {
     this.itemsDropdownOpen.update(v => !v);
   }
+
   clearSelectedItems(event?: Event): void {
     event?.stopPropagation();
     this.selectedItemIds.set([]);
@@ -663,18 +657,28 @@ export class BookingProductCategory implements OnInit {
     this.selectedTimeSlot.set('');
   }
 
-// لما تضغط على option
   toggleItemFromDropdown(itemId: number, event?: Event): void {
     event?.stopPropagation();
-    this.toggleItemSelection(itemId); // عندك أصلًا (وبيعمل reset + loadTimeSlots)
+    this.toggleItemSelection(itemId);
   }
+
   selectStaff(staff: Staff): void {
     if (!staff.isAvailable) return;
     this.updateForm({ staffId: staff.id });
     this.staffDropdownOpen.set(false);
+
+    // Reset and load time slots when staff changes (OLD FLOW)
+    if (!(this.makeupMode() && this.isMakeupCategory())) {
+      this.timeSlots.set([]);
+      this.selectedTimeSlot.set('');
+      
+      // Load time slots if date and service are already selected
+      if (this.form().date && this.selectedService()) {
+        this.loadTimeSlots();
+      }
+    }
   }
 
-  // Service Type
   setServiceType(type: 0 | 1): void {
     this.updateForm({ serviceType: type });
   }
@@ -727,26 +731,45 @@ export class BookingProductCategory implements OnInit {
 
     this.selectedItemIds.set(next);
 
-    // reset slots when items change
     this.timeSlots.set([]);
     this.selectedTimeSlot.set('');
 
-    // reload slots if we can
     this.loadTimeSlots();
   }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TIME SLOTS - UNIFIED FOR BOTH FLOWS
+  // ─────────────────────────────────────────────────────────────────────────
 
   private loadTimeSlots(): void {
     const staffId = this.form().staffId;
     const date = this.form().date;
-    const ids = this.selectedItemIds();
 
-    if (!staffId || !date || ids.length === 0) return;
+    if (!staffId || !date) return;
+
+    // Determine which item IDs to use
+    let itemIds: number[] = [];
+
+    if (this.makeupMode() && this.isMakeupCategory()) {
+      // Makeup flow: use selected items
+      itemIds = this.selectedItemIds();
+    } else {
+      // Old flow: use selected service
+      const service = this.selectedService();
+      if (service) {
+        itemIds = [service.id];
+      }
+    }
+
+    if (itemIds.length === 0) return;
 
     this.isLoadingSlots.set(true);
     this.timeSlots.set([]);
     this.selectedTimeSlot.set('');
 
-    this.bookingService.getAvailableTimeSlots(staffId, date, ids)
+    console.log('[loadTimeSlots]', { staffId, date, itemIds });
+
+    this.bookingService.getAvailableTimeSlots(staffId, date, itemIds)
       .pipe(
         finalize(() => {
           this.isLoadingSlots.set(false);
@@ -766,20 +789,22 @@ export class BookingProductCategory implements OnInit {
   }
 
   private buildMakeupReservationDateIso(date: string, slot: string): string {
-    const start = (slot || '').split('-')[0]?.trim(); // "18:00"
+    const start = (slot || '').split('-')[0]?.trim();
     const [y, m, d] = date.split('-').map(Number);
     const [hh, mm] = start.split(':').map(Number);
 
-
     return new Date(Date.UTC(y, m - 1, d, hh, mm, 0)).toISOString();
   }
-  private buildReservationDateIso(date: string, time: string): string {
+
+  private buildReservationDateIso(date: string, slot: string): string {
+    // Extract time from slot (e.g., "09:00 - 10:00" or "09:00")
+    const start = (slot || '').split('-')[0]?.trim();
     const [y, m, d] = date.split('-').map(Number);
-    const [hh, mm] = (time || '00:00').split(':').map(Number);
-
+    const [hh, mm] = (start || '00:00').split(':').map(Number);
 
     return new Date(Date.UTC(y, m - 1, d, hh, mm, 0)).toISOString();
   }
+
   // ─────────────────────────────────────────────────────────────────────────
   // SUBMIT BOOKING
   // ─────────────────────────────────────────────────────────────────────────
@@ -794,7 +819,7 @@ export class BookingProductCategory implements OnInit {
       return;
     }
 
-    // ✅ قبل أي submit: افتح Terms Sheet لو موجودة ولسه مش متخطية
+    // Check payment terms
     if (!skipTerms && this.hasPaymentTerms()) {
       this.pendingSubmitAfterTerms.set(true);
       this.openPaymentTermsSheet();
@@ -839,10 +864,8 @@ export class BookingProductCategory implements OnInit {
         )
         .subscribe({
           next: (res) => {
-            if (res.status) {
-              this.updateForm({ bookingId: res.data });
-              this.showOtpStep.set(true);
-              this.showToast('success', res.msgEN || 'OTP sent to your WhatsApp');
+            if (res.status && res.data) {
+              this.handleBookingSuccess(res.data, res.msgEN || 'Payment link sent to your WhatsApp');
             } else {
               this.showAlert('error', 'Booking Failed', res.msgEN || 'Something went wrong');
             }
@@ -854,6 +877,8 @@ export class BookingProductCategory implements OnInit {
 
     // ───── Old flow submit ─────
     const service = this.selectedService();
+    const slot = this.selectedTimeSlot();
+
     if (!service) {
       this.isSubmitting.set(false);
       this.cdr.markForCheck();
@@ -861,10 +886,17 @@ export class BookingProductCategory implements OnInit {
       return;
     }
 
+    if (!slot) {
+      this.isSubmitting.set(false);
+      this.cdr.markForCheck();
+      this.showAlert('error', 'Error', 'Please select a time slot');
+      return;
+    }
+
     const body: SubmitCategoryBookingBody = {
       branchId: branch.id,
       categoryId: category.id,
-      reservationDate: this.buildReservationDateIso(f.date, f.time),
+      reservationDate: this.buildReservationDateIso(f.date, slot),
       staffId: f.staffId,
       noOfPersons: f.persons,
       serviceType: f.serviceType,
@@ -883,93 +915,78 @@ export class BookingProductCategory implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          if (res.status) {
-            this.updateForm({ bookingId: res.data });
-            this.showOtpStep.set(true);
-            this.showToast('success', res.msgEN || 'OTP sent to your WhatsApp');
+          if (res.status && res.data) {
+            this.handleBookingSuccess(res.data, res.msgEN || 'Payment link sent to your WhatsApp');
           } else {
             this.showAlert('error', 'Booking Failed', res.msgEN || 'Something went wrong');
           }
         }
       });
   }
-  openPaymentTermsSheet(): void {
-  this.paymentTermsAccepted.set(false);
-  this.showPaymentTermsSheet.set(true);
-  this.cdr.markForCheck();
-}
 
-closePaymentTermsSheet(): void {
-  this.showPaymentTermsSheet.set(false);
-  this.pendingSubmitAfterTerms.set(false);
-  this.cdr.markForCheck();
-}
+  // ─────────────────────────────────────────────────────────────────────────
+  // HANDLE BOOKING SUCCESS
+  // ─────────────────────────────────────────────────────────────────────────
 
-agreePaymentTermsAndContinue(): void {
-  if (!this.paymentTermsAccepted()) return;
-
-  this.showPaymentTermsSheet.set(false);
-  this.cdr.markForCheck();
-
-  // لو جاي من submitBooking
-  if (this.pendingSubmitAfterTerms()) {
-    this.pendingSubmitAfterTerms.set(false);
-    this.submitBooking(true); // ✅ كمل التنفيذ
+  private handleBookingSuccess(paymentLink: string, message: string): void {
+    this.paymentUrl.set(paymentLink);
+    this.paymentMessage.set(message);
+    this.showPaymentSuccess.set(true);
+    this.cdr.markForCheck();
   }
-}
+
+  openPaymentLink(): void {
+    const url = this.paymentUrl();
+    if (url) {
+      window.open(url, '_blank');
+    }
+  }
+
+  copyPaymentLink(): void {
+    const url = this.paymentUrl();
+    if (url) {
+      navigator.clipboard.writeText(url).then(() => {
+        this.showToast('success', 'Payment link copied!');
+      }).catch(() => {
+        this.showToast('error', 'Failed to copy link');
+      });
+    }
+  }
+
+  closePaymentSuccess(): void {
+    this.showPaymentSuccess.set(false);
+    this.router.navigate(['/']);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // PAYMENT TERMS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  openPaymentTermsSheet(): void {
+    this.paymentTermsAccepted.set(false);
+    this.showPaymentTermsSheet.set(true);
+    this.cdr.markForCheck();
+  }
+
+  closePaymentTermsSheet(): void {
+    this.showPaymentTermsSheet.set(false);
+    this.pendingSubmitAfterTerms.set(false);
+    this.cdr.markForCheck();
+  }
+
+  agreePaymentTermsAndContinue(): void {
+    if (!this.paymentTermsAccepted()) return;
+
+    this.showPaymentTermsSheet.set(false);
+    this.cdr.markForCheck();
+
+    if (this.pendingSubmitAfterTerms()) {
+      this.pendingSubmitAfterTerms.set(false);
+      this.submitBooking(true);
+    }
+  }
 
   trackByItemId = (_: number, it: ServiceItem) => it.id;
-
-  
-  // ─────────────────────────────────────────────────────────────────────────
-  // VERIFY OTP
-  // ─────────────────────────────────────────────────────────────────────────
-
-  verifyOtp(): void {
-    const { bookingId, otp } = this.form();
-    if (!bookingId || !otp) return;
-
-    this.isVerifying.set(true);
-
-    this.bookingService.verifyOtp(bookingId, otp)
-      .pipe(
-        finalize(() => {
-          this.isVerifying.set(false);
-          this.cdr.markForCheck();
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe({
-        next: (res) => {
-          if (res.status) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Booking Confirmed! 🎉',
-              html: `
-                <div class="swal-success-content">
-                  <p>${res.msgEN || 'Your booking has been verified!'}</p>
-                  <div class="ref-box">
-                    <span class="ref-label">Reference</span>
-                    <span class="ref-code">${res.data}</span>
-                  </div>
-                  <p class="note">Payment link sent to WhatsApp</p>
-                </div>
-              `,
-              confirmButtonText: 'Done',
-              confirmButtonColor: 'var(--booking-color)',
-              allowOutsideClick: false
-            }).then(() => this.router.navigate(['/']));
-          } else {
-            this.showAlert('error', 'Invalid OTP', res.msgEN || 'Please check and try again');
-          }
-        }
-      });
-  }
-
-  resendOtp(): void {
-    this.showOtpStep.set(false);
-    setTimeout(() => this.submitBooking(), 100);
-  }
 
   // ─────────────────────────────────────────────────────────────────────────
   // ALERTS

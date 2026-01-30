@@ -642,3 +642,119 @@
     font-size: 0.95rem;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   ngx-material-intl-tel-input Styling
+   ══════════════════════════════════════════════════════════ */
+
+:host ::ng-deep ngx-material-intl-tel-input {
+  --mat-theme-primary: var(--product-color);
+  --mat-filled-tel-form-container-shape: 12px;
+  --mat-outline-tel-form-background: var(--input-bg);
+}
+
+/* Field wrapper styling */
+:host ::ng-deep ngx-material-intl-tel-input .mat-mdc-text-field-wrapper {
+  min-height: 48px;
+  border-radius: 0.75rem;
+}
+
+/* Outline border */
+:host ::ng-deep ngx-material-intl-tel-input .mdc-notched-outline__leading,
+:host ::ng-deep ngx-material-intl-tel-input .mdc-notched-outline__notch,
+:host ::ng-deep ngx-material-intl-tel-input .mdc-notched-outline__trailing {
+  border-color: rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Input padding */
+:host ::ng-deep ngx-material-intl-tel-input .mat-mdc-form-field-infix {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Muted Placeholder Styling
+   ───────────────────────────────────────────────────────── */
+:host ::ng-deep ngx-material-intl-tel-input input::placeholder {
+  color: #9ca3af !important;          /* Muted gray color */
+  opacity: 0.7 !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+:host ::ng-deep ngx-material-intl-tel-input input::-webkit-input-placeholder {
+  color: #9ca3af !important;
+  opacity: 0.7 !important;
+}
+
+/* Firefox */
+:host ::ng-deep ngx-material-intl-tel-input input::-moz-placeholder {
+  color: #9ca3af !important;
+  opacity: 0.7 !important;
+}
+
+/* MS Edge */
+:host ::ng-deep ngx-material-intl-tel-input input:-ms-input-placeholder {
+  color: #9ca3af !important;
+  opacity: 0.7 !important;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Input Text When Typing (if you want muted text)
+   ───────────────────────────────────────────────────────── */
+:host ::ng-deep ngx-material-intl-tel-input input.mat-mdc-input-element {
+  color: #6b7280 !important;          /* Muted text color when typing */
+  /* OR use a darker color if you want readable text: */
+  /* color: #374151 !important; */
+}
+
+/* ─────────────────────────────────────────────────────────
+   Floating Label Styling (muted)
+   ───────────────────────────────────────────────────────── */
+:host ::ng-deep ngx-material-intl-tel-input .mdc-floating-label {
+  color: #9ca3af !important;          /* Muted label color */
+}
+
+:host ::ng-deep ngx-material-intl-tel-input .mdc-floating-label--float-above {
+  color: var(--product-color) !important;  /* Active label color */
+}
+
+/* ─────────────────────────────────────────────────────────
+   Focus States
+   ───────────────────────────────────────────────────────── */
+:host ::ng-deep ngx-material-intl-tel-input .mdc-text-field--focused 
+  .mdc-notched-outline__leading,
+:host ::ng-deep ngx-material-intl-tel-input .mdc-text-field--focused 
+  .mdc-notched-outline__notch,
+:host ::ng-deep ngx-material-intl-tel-input .mdc-text-field--focused 
+  .mdc-notched-outline__trailing {
+  border-color: var(--product-color) !important;
+  border-width: 2px !important;
+}
+
+/* Country dropdown button styling */
+:host ::ng-deep ngx-material-intl-tel-input .country-selector {
+  color: #6b7280 !important;
+}
+/* 1) Hide label (زي ما عملت) */
+:host ::ng-deep ngx-material-intl-tel-input .mdc-floating-label,
+:host ::ng-deep ngx-material-intl-tel-input mat-label {
+  display: none !important;
+}
+
+/* 2) Remove the outline notch gap */
+:host ::ng-deep ngx-material-intl-tel-input .mdc-notched-outline__notch {
+  border-top: 1px solid rgba(0, 0, 0, 0.18) !important;  /* نفس لون البوردر بتاعك */
+}
+
+/* الأهم: خلي عرض النوتش = صفر */
+:host ::ng-deep ngx-material-intl-tel-input .mdc-notched-outline--notched .mdc-notched-outline__notch {
+  width: 0 !important;
+  padding: 0 !important;
+}
+
+/* أحيانًا محتاج كمان نخليها غير “notched” أصلاً */
+:host ::ng-deep ngx-material-intl-tel-input .mdc-notched-outline--notched {
+  --mdc-notched-outline-notch-width: 0px !important;
+}

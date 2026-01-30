@@ -34,7 +34,6 @@ export interface AppointmentCategory {
   arabicName: string;
   englishName: string;
   image: string;
-
   deposit: number;      
   isMakeup: boolean;
   isPackage: boolean;
@@ -61,16 +60,17 @@ export interface ConfigSetting {
   key: string;
   value: string;
 }
+
 export interface BusinessInfo {
   paymentTerms: string | null;
-  // (اختياري) لو محتاج باقي الحقول فيما بعد
   shop_logo?: string | null;
   currency?: string | null;
   shop_nameEN?: string | null;
   shop_nameAR?: string | null;
 }
+
 export interface CategoryConfigData {
-  business_info?: BusinessInfo; // ✅ add this
+  business_info?: BusinessInfo;
   branches: Branch[];
   bookingLocations: BookingLocation[];
   apointmentCategories: AppointmentCategory[];
@@ -87,7 +87,7 @@ export interface SubmitCategoryBookingBody {
   noOfPersons: number;
   serviceType: number;
   services: number[];
-  locationId: number | null; // Updated to accept null
+  locationId: number | null;
   notes: string;
 }
 
@@ -168,14 +168,14 @@ export class BookingCategoryService {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // SUBMIT BOOKING
+  // SUBMIT BOOKING (Returns payment URL now)
   // ─────────────────────────────────────────────────────────────────────────
   
-  submitBooking(body: SubmitCategoryBookingBody): Observable<ApiResponse<number>> {
-    return this.http.post<ApiResponse<number>>(`${this.baseUrl}/api/SubmitBooking`, body).pipe(
+  submitBooking(body: SubmitCategoryBookingBody): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.baseUrl}/api/SubmitBooking`, body).pipe(
       catchError(err => of({
         status: false,
-        data: 0,
+        data: '',
         msgEN: err?.error?.msgEN || 'Failed to submit booking',
         msgAR: err?.error?.msgAR || 'فشل في إرسال الحجز'
       }))
@@ -183,23 +183,9 @@ export class BookingCategoryService {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // VERIFY OTP
-  // ─────────────────────────────────────────────────────────────────────────
-  
-  verifyOtp(bookingId: number, otp: string): Observable<ApiResponse<string>> {
-    const url = `${this.baseUrl}/api/VerifyBookingOtp?BookingId=${bookingId}&otpNumber=${otp.trim()}`;
-    return this.http.post<ApiResponse<string>>(url, null).pipe(
-      catchError(err => of({
-        status: false,
-        data: '',
-        msgEN: err?.error?.msgEN || 'Invalid OTP',
-        msgAR: err?.error?.msgAR || 'رمز التحقق غير صحيح'
-      }))
-    );
-  }
-  // ─────────────────────────────────────────────────────────────────────────
   // ITEMS BY STAFF (Makeup flow)
   // ─────────────────────────────────────────────────────────────────────────
+  
   getItemsByStaff(categoryId: number, staffId: number) {
     const url = `${this.baseUrl}/api/GetItemUnitsByStaff?CategoryId=${categoryId}&StaffId=${staffId}`;
     return this.http.get<ApiResponse<ServiceItem[]>>(url).pipe(
@@ -211,20 +197,21 @@ export class BookingCategoryService {
       })
     );
   }
+
   // ─────────────────────────────────────────────────────────────────────────
   // AVAILABLE TIME SLOTS (Makeup flow)
-  // need (StaffId, BookingDate) + body: number[] itemIds
   // ─────────────────────────────────────────────────────────────────────────
+  
   getAvailableTimeSlots(staffId: number, bookingDate: string, itemIds: number[]): Observable<string[]> {
-    const bookingDateIso = new Date(bookingDate).toISOString(); // from 'YYYY-MM-DD'
+    const bookingDateIso = new Date(bookingDate).toISOString();
     const url = `${this.baseUrl}/api/GetAvailableTimeSlots?StaffId=${staffId}&BookingDate=${bookingDateIso}`;
 
-    // غالباً POST لأن فيه body
     return this.http.post<ApiResponse<string[]>>(url, itemIds).pipe(
       map(res => res.status ? res.data : []),
       catchError(() => of([]))
     );
   }
+
   // ─────────────────────────────────────────────────────────────────────────
   // HELPERS
   // ─────────────────────────────────────────────────────────────────────────

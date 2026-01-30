@@ -91,6 +91,7 @@
 
 // src/app/pages/auth/register.ts
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import Swal from 'sweetalert2';
@@ -104,13 +105,14 @@ import {
   NonNullableFormBuilder,
 } from '@angular/forms';
 import { AuthService, Branch } from '../../services/auth';
+import { NgxMaterialIntlTelInputComponent } from 'ngx-material-intl-tel-input';
 
 type Step = 1 | 2 | 3;
 
 @Component({
   standalone: true,
   selector: 'app-register',
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, NgxMaterialIntlTelInputComponent],
   templateUrl: './register.html',
   styleUrl: './register.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -143,7 +145,7 @@ export class Register implements OnInit {
   ngOnInit(): void {
     // STEP 1: mobile number
     this.step1Form = this.fb.group({
-      mobileNo: ['', [Validators.required, Validators.pattern(/^\d{7,}$/)]],
+      mobileNo: ['', [Validators.required]],
     });
 
     // STEP 2: OTP
@@ -225,6 +227,14 @@ export class Register implements OnInit {
   }
 
   clearError(): void { this.errorMsg.set(''); }
+
+  get mobileCtrl(): FormControl {
+    return this.step1Form.get('mobileNo') as FormControl;
+  }
+  private fullMobileNo(): string {
+    const v = this.step1Form.get('mobileNo')!.value ?? '';
+    return String(v).replace(/\D/g, '');
+  }
 
   /* ───────── STEP 1: Send OTP ───────── */
   sendOtp(): void {
