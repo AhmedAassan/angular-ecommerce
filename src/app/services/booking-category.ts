@@ -112,7 +112,9 @@ export class BookingCategoryService {
   // CONFIG DATA
   // ─────────────────────────────────────────────────────────────────────────
   
-  getConfigData(): Observable<CategoryConfigData> {
+  getConfigData(force = false): Observable<CategoryConfigData> {
+    if (force) this.configCache$ = null;
+
     if (!this.configCache$) {
       this.configCache$ = this.http
         .get<ApiResponse<CategoryConfigData>>(`${this.baseUrl}/api/GetConfigDataExternal`)

@@ -102,7 +102,7 @@ export class BookingCategory implements OnInit {
   // ─────────────────────────────────────────────────────────────────────────
 
   private loadConfig(): void {
-    this.bookingService.getConfigData()
+    this.bookingService.getConfigData(true)
       .pipe(
         finalize(() => {
           this.isLoading.set(false);

@@ -19,11 +19,13 @@ import Swal from 'sweetalert2';
 import { AuthService, LoginDto } from '../../services/auth';
 import { CartManagerService } from '../../services/cart-manager';
 import { GuestCartService } from '../../services/guest-cart';
+import { NgxMaterialIntlTelInputComponent } from 'ngx-material-intl-tel-input';
+import { FormControl } from '@angular/forms';
 
 @Component({
   standalone: true,
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, NgxMaterialIntlTelInputComponent ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,7 +59,7 @@ export class Login implements OnInit, OnDestroy {
 
   // ===== Form =====
   readonly form = this.fb.nonNullable.group({
-    mobile: ['', [Validators.required, Validators.pattern(/^\+?\d{8,15}$/)]],
+    mobile: ['', [Validators.required]],   // ✅ نفس فكرة register
     password: ['', [Validators.required, Validators.minLength(6)]],
     rememberMe: [false],
   });
@@ -131,7 +133,21 @@ export class Login implements OnInit, OnDestroy {
     // Return cleaned path
     return this.returnUrl.replace(/^\//, '').split('/')[0] || 'previous page';
   }
+  get mobileCtrl(): FormControl {
+    return this.form.get('mobile') as FormControl;
+  }
 
+  private fullMobile(): string {
+    const v: any = this.form.get('mobile')?.value;
+
+    const raw =
+      typeof v === 'string'
+        ? v
+        : (v?.e164Number ?? v?.internationalNumber ?? v?.number ?? '');
+
+    // يشيل + ومسافات وأي حاجة غير أرقام
+    return String(raw).replace(/\D/g, '');
+  }
   // ===== Password Visibility =====
   togglePasswordVisibility(): void {
     this.showPasswordSignal.update(show => !show);
@@ -202,7 +218,8 @@ export class Login implements OnInit, OnDestroy {
     this.loadingSignal.set(true);
     this.disableFormControls();
 
-    const { mobile, password } = this.form.getRawValue();
+    const { password } = this.form.getRawValue();
+    const mobile = this.fullMobile();
     const body: LoginDto = { mobile, password };
     const colors = this.getThemeColors();
     const hasGuestItems = this.hasGuestCart();

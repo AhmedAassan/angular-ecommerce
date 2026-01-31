@@ -232,15 +232,24 @@ export class Register implements OnInit {
     return this.step1Form.get('mobileNo') as FormControl;
   }
   private fullMobileNo(): string {
-    const v = this.step1Form.get('mobileNo')!.value ?? '';
-    return String(v).replace(/\D/g, '');
+    const v: any = this.step1Form.get('mobileNo')?.value;
+
+    // ngx-material-intl-tel-input غالبًا بيرجع object
+    const raw =
+      typeof v === 'string'
+        ? v
+        : (v?.e164Number ?? v?.internationalNumber ?? v?.number ?? '');
+
+    // يشيل + ومسافات وأي حاجة غير أرقام
+    return String(raw).replace(/\D/g, '');
   }
 
   /* ───────── STEP 1: Send OTP ───────── */
   sendOtp(): void {
     if (this.step1Form.invalid) { this.step1Form.markAllAsTouched(); return; }
 
-    const mobileNo: string = this.step1Form.get('mobileNo')!.value;
+    const mobileNo = this.fullMobileNo();
+    console.log('mobileNo to send:', mobileNo);
     this.loading.set(true);
     this.errorMsg.set('');
 
@@ -260,7 +269,7 @@ export class Register implements OnInit {
 
   resendOtp(): void {
     if (!this.canResend()) return;
-    const mobileNo: string = this.step1Form.get('mobileNo')!.value;
+    const mobileNo = this.fullMobileNo();
     this.auth.requestOtpNumber(mobileNo).subscribe({
       next: () => this.startResendCooldown(),
       error: err => this.errorMsg.set(this.pickErr(err, 'Failed to resend OTP'))
@@ -276,7 +285,7 @@ export class Register implements OnInit {
   verifyOtp(): void {
     if (this.step2Form.invalid) { this.step2Form.markAllAsTouched(); return; }
 
-    const mobileNo: string = this.step1Form.get('mobileNo')!.value;
+    const mobileNo = this.fullMobileNo();
     const otpNumber: string = this.step2Form.get('otp')!.value;
 
     this.loading.set(true);
@@ -323,7 +332,7 @@ export class Register implements OnInit {
       return;
     }
 
-    const mobileNo: string = this.step1Form.get('mobileNo')!.value;
+    const mobileNo = this.fullMobileNo();
     const { fullName, email, gender, branchId, password, confirmPassword } = this.step3Form.getRawValue();
 
     this.loading.set(true);
